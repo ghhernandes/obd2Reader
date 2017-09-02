@@ -3,6 +3,10 @@
     <string name="title_home">Início</string>
     <string name="title_options">Opções</string>
     <string name="title_notifications">Notificações</string>
+    <string name="bluetooth_actived">Bluetooth ativado</string>
+    <string name="bluetooth_desactived">Bluetooth desativado</string>
+    <string name="bluetooth_unsupported">Bluetooth não suportado</string>
+    <string name="bluetooth_choose">Escolha o dispositivo Bluetooth</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

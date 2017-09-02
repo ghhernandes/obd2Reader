@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.gabriel.obd2reader.fragments.HomeFragment">
+    tools:context="com.github.gabriel.obd2reader.fragments.HomeFragment">
     <ListView
         android:id="@+id/list_sensor"
         android:layout_width="match_parent"

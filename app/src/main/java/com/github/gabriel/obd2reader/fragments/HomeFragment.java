@@ -1,4 +1,4 @@
-package com.example.gabriel.obd2reader.fragments;
+package com.github.gabriel.obd2reader.fragments;
 
 
 import android.os.Bundle;
@@ -6,12 +6,11 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.example.gabriel.obd2reader.R;
-import com.example.gabriel.obd2reader.adapters.SensorAdapter;
-import com.example.gabriel.obd2reader.classes.SensorClass;
+import com.github.gabriel.obd2reader.R;
+import com.github.gabriel.obd2reader.adapters.SensorAdapter;
+import com.github.gabriel.obd2reader.classes.SensorClass;
 
 import java.util.ArrayList;
 import java.util.List;

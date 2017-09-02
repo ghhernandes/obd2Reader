@@ -1,4 +1,4 @@
-package com.example.gabriel.obd2reader.classes;
+package com.github.gabriel.obd2reader.classes;
 
 public class SensorClass {
     public String id;

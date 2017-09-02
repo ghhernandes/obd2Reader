@@ -1,4 +1,4 @@
-package com.example.gabriel.obd2reader.activities;
+package com.github.gabriel.obd2reader.activities;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,14 +9,16 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import com.example.gabriel.obd2reader.fragments.HomeFragment;
-import com.example.gabriel.obd2reader.fragments.NotificationsFragment;
-import com.example.gabriel.obd2reader.fragments.OptionsFragment;
-import com.example.gabriel.obd2reader.R;
+import com.github.gabriel.obd2reader.fragments.HomeFragment;
+import com.github.gabriel.obd2reader.fragments.NotificationsFragment;
+import com.github.gabriel.obd2reader.fragments.OptionsFragment;
+import com.github.gabriel.obd2reader.R;
 
 public class MainActivity extends AppCompatActivity {
     private Fragment fragment;
     private FragmentManager fragmentManager;
+
+
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {

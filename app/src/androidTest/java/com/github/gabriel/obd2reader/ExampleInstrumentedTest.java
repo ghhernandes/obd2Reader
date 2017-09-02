@@ -1,4 +1,4 @@
-package com.example.gabriel.obd2reader;
+package com.github.gabriel.obd2reader;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

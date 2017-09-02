@@ -1,15 +1,13 @@
-package com.example.gabriel.obd2reader.adapters;
+package com.github.gabriel.obd2reader.adapters;
 
 import android.app.Activity;
-import android.provider.Settings;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.gabriel.obd2reader.R;
-import com.example.gabriel.obd2reader.classes.SensorClass;
+import com.github.gabriel.obd2reader.R;
+import com.github.gabriel.obd2reader.classes.SensorClass;
 
 import java.util.List;
 
