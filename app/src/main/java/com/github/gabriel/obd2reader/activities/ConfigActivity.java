@@ -5,8 +5,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -27,9 +25,6 @@ import com.github.gabriel.obd2reader.config.ObdConfig;
 import java.util.ArrayList;
 import java.util.Set;
 
-/**
- * Configuration com.github.pires.obd.reader.activity.
- */
 public class ConfigActivity extends PreferenceActivity implements OnPreferenceChangeListener {
 
     public static final String BLUETOOTH_LIST_KEY = "bluetooth_list_preference";
