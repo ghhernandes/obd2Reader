@@ -13,6 +13,7 @@ import com.github.gabriel.obd2reader.fragments.HomeFragment;
 import com.github.gabriel.obd2reader.fragments.NotificationsFragment;
 import com.github.gabriel.obd2reader.fragments.OptionsFragment;
 import com.github.gabriel.obd2reader.R;
+import com.github.gabriel.obd2reader.io.ObdCommandJob;
 
 public class MainActivity extends AppCompatActivity {
     private Fragment fragment;
@@ -54,6 +55,10 @@ public class MainActivity extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+    }
+
+    public void stateUpdate(final ObdCommandJob job) {
+
     }
 
 }
