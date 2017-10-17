@@ -4,6 +4,5 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.github.gabriel.obd2reader.activities.ConfigActivity">
-
+    tools:context="com.github.gabriel.obd2reader.activities.PreferencesActivity">
 </android.support.constraint.ConstraintLayout>

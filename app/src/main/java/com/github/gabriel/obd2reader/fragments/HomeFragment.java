@@ -1,8 +1,10 @@
 package com.github.gabriel.obd2reader.fragments;
 
 
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +32,15 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
-        ListView list = (ListView) rootView.findViewById(R.id.list_sensor);
+        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler);
+
+        // aumenta performance se as alteracoes nao afetarem o tamanho do layout
+        recyclerView.setHasFixedSize(true);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(),
+                LinearLayoutManager.VERTICAL, false);
+
+        recyclerView.setLayoutManager(layoutManager);
 
         List<SensorClass> sensores = new ArrayList<SensorClass>(); //passar os sensores
 
@@ -39,13 +49,10 @@ public class HomeFragment extends Fragment {
         sensores.add(new SensorClass("temperatura", "Temperatura", "", "30 °C"));
         sensores.add(new SensorClass("consumo", "Consumo", "", "10 km/l"));
 
-//        ArrayAdapter<SensorClass> adapter = new ArrayAdapter<SensorClass>(rootView.getContext(),
-//                                                                          android.R.layout.simple_list_item_1,
-//                                                                          sensores);
-        SensorAdapter adapter = new SensorAdapter(sensores, getActivity());
-        list.setAdapter(adapter);
+        recyclerView.setAdapter(new SensorAdapter(sensores, getActivity()));
 
         return rootView;
     }
+
 
 }

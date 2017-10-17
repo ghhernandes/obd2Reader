@@ -3,9 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.github.gabriel.obd2reader.fragments.HomeFragment">
-    <ListView
-        android:id="@+id/list_sensor"
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </ListView>
+        android:layout_height="match_parent" />
+
+    <!--<ListView-->
+        <!--android:id="@+id/list_sensor"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent">-->
+    <!--</ListView>-->
 </FrameLayout>

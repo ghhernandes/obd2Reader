@@ -6,7 +6,7 @@
     <string name="bluetooth_actived">Bluetooth ativado</string>
     <string name="bluetooth_desactived">Bluetooth desativado</string>
     <string name="bluetooth_unsupported">Bluetooth não suportado</string>
-    <string name="bluetooth_choose">Escolha o dispositivo bluetooth</string>
+    <string name="bluetooth_choose">Escolha o dispositivo Bluetooth</string>
     <string name="action_settings">Settings</string>
     <string name="action_clear_codes">Clear Codes</string>
     <string name="notification_action">Tap to open OBD-Reader</string>
@@ -35,14 +35,14 @@
     <string name="text_zero" translatable="false">0</string>
     <string name="text_consumption_default" translatable="false">0l/100km</string>
     <string name="text_runtime_default" translatable="false">00:00:00</string>
-    <string name="title_pref_obd">OBD Preferences</string>
-    <string name="title_pref_commands">OBD Commands</string>
+    <string name="title_pref_obd">Preferências do OBD</string>
+    <string name="title_pref_commands">Comandos OBD</string>
     <string name="title_pref_bluetooth" translatable="false">Bluetooth</string>
     <string name="title_pref_gps" translatable="false">GPS</string>
     <string name="text_no_bluetooth_id">Sorry, your device doesn\'t support Bluetooth</string>
-    <string name="text_bluetooth_disabled">You have Bluetooth disabled. Please enable it (using Mock service)</string>
+    <string name="text_bluetooth_disabled">Bluetooth desabilitado.</string>
     <string name="text_bluetooth_nodevice">No Bluetooth device selected</string>
-    <string name="text_bluetooth_error_connecting">Cannot connect to bluetooth device!</string>
+    <string name="text_bluetooth_error_connecting">Não foi possível conectar ao dispositivo.</string>
     <string name="text_no_orientation_sensor">Orientation sensor missing?</string>
     <string name="text_no_gps_support">Sorry, your device doesn\'t support or has disabled GPS.</string>
     <string name="text_save_trip_not_available">Sorry, trip will not be saved.</string>
@@ -50,10 +50,10 @@
     <string name="text_dtc_no_data">No DTC stored</string>
     <string name="status_no_bluetooth_id">unavailable</string>
     <string name="status_bluetooth_disabled">disabled</string>
-    <string name="status_bluetooth_ok">ready</string>
-    <string name="status_bluetooth_connecting">connecting&#8230;</string>
-    <string name="status_bluetooth_connected">connected</string>
-    <string name="status_bluetooth_error_connecting">connection failed</string>
+    <string name="status_bluetooth_ok">Pronto</string>
+    <string name="status_bluetooth_connecting">Conectando&#8230;</string>
+    <string name="status_bluetooth_connected">Conectado</string>
+    <string name="status_bluetooth_error_connecting">Conexão falhou</string>
     <string name="status_gps_fix">fix acquired</string>
     <string name="status_gps_no_fix">fix not acquired</string>
     <string name="status_gps_started">started</string>
@@ -72,11 +72,11 @@
     <string name="pref_upload_url_summary">POST URL that will accept real-time data</string>
     <string name="pref_vehicle_id_title">Vehicle ID</string>
     <string name="pref_vehicle_id_summary">Optional unique id of this vehicle, used with uploaded data</string>
-    <string name="pref_bluetooth_title">Enable Bluetooth</string>
-    <string name="pref_bluetooth_summaryOff">Turn on Bluetooth</string>
-    <string name="pref_bluetooth_summaryOn">Turn off Bluetooth</string>
-    <string name="pref_bluetooth_list_devices_summary">List of paired bluetooth devices.</string>
-    <string name="pref_bluetooth_list_devices_title">Bluetooth Devices</string>
+    <string name="pref_bluetooth_title">Habilitar Bluetooth</string>
+    <string name="pref_bluetooth_summaryOff">Ligar o Bluetooth</string>
+    <string name="pref_bluetooth_summaryOn">Desligar o Bluetooth</string>
+    <string name="pref_bluetooth_list_devices_summary">Lista de dispositivos pareados.</string>
+    <string name="pref_bluetooth_list_devices_title">Dispositivos Bluetooth</string>
     <string name="pref_gps_category_title">Enable GPS</string>
     <string name="pref_gps_category_summaryOff">Turn on GPS</string>
     <string name="pref_gps_category_summaryOn">Turn off GPS</string>
@@ -84,34 +84,21 @@
     <string name="pref_gps_update_period_summary">The length of time between querying new position in seconds</string>
     <string name="pref_gps_distance_period_title">Update Period in Meters</string>
     <string name="pref_gps_distance_period_summary">Min Distance between location updates, in meters</string>
-    <string name="pref_obd_protocols_title">OBD Protocol</string>
-    <string name="pref_obd_protocols_summary">Select OBD Protocol to use</string>
-    <string name="pref_imperial_units_title">Imperial Units</string>
-    <string name="pref_imperial_units_summaryOff">Enable imperial units</string>
-    <string name="pref_imperial_units_summaryOn">Go back to metric units</string>
-    <string name="pref_obd_update_period_title">Update Period in Seconds</string>
-    <string name="pref_obd_update_period_summary">The length of time between querying vehicle data in seconds</string>
-    <string name="pref_max_fuel_econ_title">Maximum Fuel Economy Value</string>
-    <string name="pref_max_fuel_econ_summary">Any fuel economy values larger than this will be thrown out</string>
-    <string name="pref_volumetric_efficiency_dialog_title">Volumetric Efficiency (eg 0.85)</string>
-    <string name="pref_volumetric_efficiency_summary">Used for fuel economy on vehicles without MAF sensor</string>
-    <string name="pref_volumetric_efficiency_title">Volumetric Efficiency</string>
-    <string name="pref_engine_displacement_title">Engine Displacement (liters)</string>
-    <string name="pref_engine_displacement_summary">Used for fuel economy on vehicles without MAF sensor</string>
-    <string name="pref_reader_config_title">Reader Config Commands</string>
-    <string name="pref_reader_config_summary">Commands to configure bluetooth reader, separate with new line</string>
-    <string name="title_pref_commands_summary">Select the commands you would like to see in real-time.</string>
-    <string name="title_pref_commands_title">OBD Commands</string>
-    <string name="title_pref_full_logging"> Full logging configuration </string>
-    <string name="pref_enable_full_logging_summary"> Enables full offline logging with upload</string>
-    <string name="pref_enable_full_logging_title"> Enable full logging </string>
-    <string name="default_dirname_full_logging">OBDReaderLogs</string>
-    <string name="pref_dirname_dialogTitle">Choose the name of the directory to save the logs</string>
-    <string name="pref_dirname_title">Directory name</string>
-    <string name="pref_dirname_summary">Name of the directory where to save the files</string>
-    <string name="pref_dev_email_title">Developer Email</string>
-    <string name="pref_dev_email_summary">Logs will be email to the address</string>
-    <string name="text_noerrors">There were no errors found.!</string>
+    <string name="pref_obd_protocols_title">Protocolo OBD</string>
+    <string name="pref_obd_protocols_summary">Selecione o Protocolo OBD</string>
+    <string name="pref_imperial_units_title">Unidades Imperiais</string>
+    <string name="pref_imperial_units_summaryOff">Habilitar Unidades Imperiais</string>
+    <string name="pref_imperial_units_summaryOn">Voltar para unidades métricas</string>
+    <string name="pref_obd_update_period_title">Intervalo da Sincronização</string>
+    <string name="pref_obd_update_period_summary">O período de tempo entre a consulta dos dados do veículo em segundos</string>
+    <string name="pref_max_fuel_econ_title">Valor máximo de economia de combustível</string>
+    <string name="pref_max_fuel_econ_summary">Quaisquer valores de economia de combustível maiores do que isso serão descartados</string>
+    <string name="pref_reader_config_title">Configuração do Leitor</string>
+    <string name="pref_reader_config_summary">Comandos para configurar o leitor bluetooth, separar com nova linha</string>
+    <string name="title_pref_commands_summary">Selecione os comandos que você gostaria de ver em tempo real.</string>
+    <string name="title_pref_commands_title">Comandos OBD</string>
+    <string name="starting_live_data">Iniciando transmissão em tempo real</string>
+    <string name="starting_live_data_failure">Falha ao iniciar transmissão em tempo real</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

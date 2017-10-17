@@ -1,6 +1,9 @@
 package com.github.gabriel.obd2reader.adapters;
 
 import android.app.Activity;
+import android.content.Context;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -11,22 +14,40 @@ import com.github.gabriel.obd2reader.classes.SensorClass;
 
 import java.util.List;
 
-public class SensorAdapter extends BaseAdapter {
+public class SensorAdapter extends RecyclerView.Adapter {
     private final List<SensorClass> sensores;
-    private final Activity act;
+    private final Context context;
 
-    public SensorAdapter(List<SensorClass> sensores, Activity act) {
+    public SensorAdapter(List<SensorClass> sensores, Context context) {
         this.sensores = sensores;
-        this.act = act;
+        this.context = context;
     }
 
     @Override
-    public int getCount() {
-        return sensores.size();
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                      int viewType) {
+        View view = LayoutInflater.from(context)
+                .inflate(R.layout.listview_sensors, parent, false);
+
+        SensorViewHolder holder = new SensorViewHolder(view);
+
+        return holder;
     }
 
-    public Object getItem(int position) {
-        return sensores.get(position);
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder,
+                                 int position) {
+        SensorViewHolder holder = (SensorViewHolder) viewHolder;
+
+        SensorClass sensorClass = sensores.get(position);
+
+        holder.name.setText(sensorClass.getName());
+        holder.value.setText(sensorClass.getValue());
+    }
+
+    @Override
+    public int getItemCount() {
+        return sensores.size();
     }
 
     @Override
@@ -34,18 +55,4 @@ public class SensorAdapter extends BaseAdapter {
         return 0;
     }
 
-    //metodo responsavel pela criacao de cada view
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = act.getLayoutInflater().inflate(R.layout.listview_sensors, parent, false);
-
-        SensorClass sensor = sensores.get(position);
-
-        TextView name = (TextView) view.findViewById(R.id.list_sensor_name);
-        TextView value = (TextView) view.findViewById(R.id.list_sensor_value);
-
-        name.setText(sensor.getName());
-        value.setText(sensor.getValue());
-        return view;
-    }
 }
