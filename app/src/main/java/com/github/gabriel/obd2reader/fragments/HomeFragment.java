@@ -1,7 +1,5 @@
 package com.github.gabriel.obd2reader.fragments;
 
-
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,9 +19,7 @@ import com.github.pires.obd.commands.ObdCommand;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class HomeFragment extends Fragment {
 
@@ -38,23 +34,37 @@ public class HomeFragment extends Fragment {
         @Override
         public void run() {
             int position = 0;
-            for (ObdCommand command: ObdConfig.getCommands()) {
+            for (final ObdCommand command: ObdConfig.getCommands()) {
                 try {
                     if ((act.liveDataActive) && (act.Socket != null) && (act.Socket.isConnected())) {
                         command.run(act.Socket.getInputStream(), act.Socket.getOutputStream());
 
-                        mAdapter.update(position, command.getFormattedResult());
+                        final int finalPosition = position;
+                        new Handler().post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mAdapter.update(finalPosition, command.getFormattedResult());
+                            }
+                        });
                     }
+//
+//                    final int sensorpos = mAdapter.getSensorIndex(command.getCommandPID());
+//                    if (sensorpos > 0) {
+//                        new Handler().post(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                mAdapter.update(sensorpos, command.getFormattedResult());
+//                            }
+//                        });
+//                    }
 
-                    Log.d("liveDataThread", command.getFormattedResult());
                     position += 1;
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
+
             new Handler().postDelayed(liveDataThread, 1000);
         }
     };
@@ -64,7 +74,7 @@ public class HomeFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         this.act = ((MainActivity)getActivity());
-        this.sensores = new ArrayList<SensorClass>();
+        this.sensores = new ArrayList<>();
     }
 
     @Override
@@ -72,7 +82,7 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
-        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler);
+        RecyclerView recyclerView = rootView.findViewById(R.id.recycler);
 
         // aumenta performance se as alteracoes nao afetarem o tamanho do layout
         recyclerView.setHasFixedSize(true);
@@ -92,6 +102,8 @@ public class HomeFragment extends Fragment {
 
         this.mAdapter = new MainAdapter(sensores, act);
         recyclerView.setAdapter(this.mAdapter);
+
+        new Handler().post(liveDataThread);
 
         return rootView;
     }
