@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList deviceStrs = new ArrayList();
         final ArrayList devices = new ArrayList();
 
-        if (this.BluetoothDeviceAddress == "") {
+        if (this.BluetoothDeviceAddress.equals("")) {
             this.getBluetoothDevices(deviceStrs, devices);
             this.showBluetoothDevicesDialog(deviceStrs, devices);
         } else {

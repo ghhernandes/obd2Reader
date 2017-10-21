@@ -9,15 +9,23 @@ import android.view.ViewGroup;
 import com.github.gabriel.obd2reader.R;
 import com.github.gabriel.obd2reader.classes.SensorClass;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainAdapter extends RecyclerView.Adapter {
     private final List<SensorClass> sensores;
+    private List<String> sensor_keys;
     private final Context context;
 
     public MainAdapter(List<SensorClass> sensores, Context context) {
         this.sensores = sensores;
         this.context = context;
+        this.sensor_keys = new ArrayList<>();
+
+        //adiciona o ID de cada sensor em outra lista para consulta
+        for (SensorClass s: this.sensores) {
+            this.sensor_keys.add(s.getId());
+        }
     }
 
     @Override
@@ -53,19 +61,38 @@ public class MainAdapter extends RecyclerView.Adapter {
         return sensores != null ? sensores.size() : 0;
     }
 
+    private boolean sensor_added(String sensor_id){
+        return this.sensor_keys.contains(sensor_id);
+    }
+
+    public int getSensorIndex(String sensor_id) {
+        return this.sensores.indexOf(this.sensor_keys.indexOf(sensor_id));
+    }
+
     public void add(SensorClass sensorClass) {
-        this.sensores.add(sensorClass);
-        notifyItemInserted(getItemCount());
+
+        //se encontrar o ID previamente inserido, chama a funcao de update
+        if (!sensor_added(sensorClass.getId())) {
+            this.sensores.add(sensorClass);
+            this.sensor_keys.add(sensorClass.getId());
+
+            notifyItemInserted(getItemCount());
+        }else {
+            this.update(this.sensor_keys.indexOf(sensorClass.getId()), sensorClass.getValue());
+        }
     }
 
     public void update (int position, String value) {
         SensorClass sensorClass = this.sensores.get(position);
         sensorClass.setValue(value);
+
         notifyItemChanged(position);
     }
 
     public void delete (int position) {
         this.sensores.remove(position);
+        this.sensor_keys.remove(position);
+
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, this.sensores.size());
     }
