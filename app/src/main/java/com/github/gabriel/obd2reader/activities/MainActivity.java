@@ -6,8 +6,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +23,7 @@ import com.github.gabriel.obd2reader.R;
 import com.github.gabriel.obd2reader.fragments.PreferencesFragment;
 import com.github.pires.obd.commands.ObdCommand;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -33,26 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private static boolean bluetoothDefaultIsEnable = false;
     private boolean preRequisites = true;
     private String BluetoothDeviceAddress = "";
-    private BluetoothSocket SocketConn = null;
-    private LiveDataThread liveDataThread = null;
-
-    class LiveDataThread extends Thread {
-        @Override
-        public void run() {
-            for (ObdCommand command: ObdConfig.getCommands()) {
-                try {
-                    command.run(SocketConn.getInputStream(), SocketConn.getOutputStream());
-                    Log.d("OBDCommand", command.getFormattedResult());
-
-                    sleep(100);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
+    public BluetoothSocket Socket = null;
+    public Boolean liveDataActive = false;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -88,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         this.BluetoothDeviceAddress = "";
-        this.SocketConn = null;
+        this.Socket = null;
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -172,16 +155,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void connectBluetoothDeviceAddress(String deviceAddress) {
-        if ((this.SocketConn == null) || (!this.SocketConn.isConnected())) {
+        if ((this.Socket == null) || (!this.Socket.isConnected())) {
             BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
             BluetoothDevice device = btAdapter.getRemoteDevice(deviceAddress);
             UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
             try {
-                this.SocketConn = device.createInsecureRfcommSocketToServiceRecord(uuid);
-                this.SocketConn.connect();
+                this.Socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
+                this.Socket.connect();
                 Toast.makeText(this, getString(R.string.status_bluetooth_ok), Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
-                this.SocketConn = null;
+                this.Socket = null;
                 Toast.makeText(this, R.string.text_bluetooth_error_connecting, Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
@@ -199,18 +182,13 @@ public class MainActivity extends AppCompatActivity {
             connectBluetoothDeviceAddress(this.BluetoothDeviceAddress);
         }
 
-        if ((preRequisites) && (this.SocketConn != null) && (this.SocketConn.isConnected())) {
-            LiveDataThread liveDataThread = new LiveDataThread();
-            new Thread(liveDataThread).start();
+        if (preRequisites) {
+            this.liveDataActive = true;
         }
     }
 
     private void stopLiveData() {
-        if ((this.liveDataThread != null) && (!this.liveDataThread.isInterrupted())) {
-            this.liveDataThread.interrupt();
-            this.liveDataThread = null;
-        }
+        this.liveDataActive = false;
     }
-
 
 }

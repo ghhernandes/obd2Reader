@@ -16,15 +16,15 @@ import java.util.List;
  * Created by gabriel on 15/10/17.
  */
 
-public class SensorViewHolder extends RecyclerView.ViewHolder {
+public class MainViewHolder extends RecyclerView.ViewHolder {
 
     final TextView name;
     final TextView value;
 
-    public SensorViewHolder (View view) {
+    public MainViewHolder(View view) {
         super(view);
-        name = (TextView) view.findViewById(R.id.list_sensor_name);
-        value = (TextView) view.findViewById(R.id.list_sensor_value);
+        name = (TextView) view.findViewById(R.id.main_card_name);
+        value = (TextView) view.findViewById(R.id.main_card_value);
     }
     
 

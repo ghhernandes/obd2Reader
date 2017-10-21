@@ -84,7 +84,7 @@
     <string name="pref_gps_update_period_summary">The length of time between querying new position in seconds</string>
     <string name="pref_gps_distance_period_title">Update Period in Meters</string>
     <string name="pref_gps_distance_period_summary">Min Distance between location updates, in meters</string>
-    <string name="pref_obd_protocols_title">Protocolo OBD</string>
+    <string name="pref_obd_protocols_title">Protocolos</string>
     <string name="pref_obd_protocols_summary">Selecione o Protocolo OBD</string>
     <string name="pref_imperial_units_title">Unidades Imperiais</string>
     <string name="pref_imperial_units_summaryOff">Habilitar Unidades Imperiais</string>
@@ -96,7 +96,7 @@
     <string name="pref_reader_config_title">Configuração do Leitor</string>
     <string name="pref_reader_config_summary">Comandos para configurar o leitor bluetooth, separar com nova linha</string>
     <string name="title_pref_commands_summary">Selecione os comandos que você gostaria de ver em tempo real.</string>
-    <string name="title_pref_commands_title">Comandos OBD</string>
+    <string name="title_pref_commands_title">Selecionar</string>
     <string name="starting_live_data">Iniciando transmissão em tempo real</string>
     <string name="starting_live_data_failure">Falha ao iniciar transmissão em tempo real</string>
 
