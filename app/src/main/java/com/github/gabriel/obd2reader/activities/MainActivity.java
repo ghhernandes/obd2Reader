@@ -22,6 +22,11 @@ import com.github.gabriel.obd2reader.fragments.NotificationsFragment;
 import com.github.gabriel.obd2reader.R;
 import com.github.gabriel.obd2reader.fragments.PreferencesFragment;
 import com.github.pires.obd.commands.ObdCommand;
+import com.github.pires.obd.commands.protocol.EchoOffCommand;
+import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
+import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
+import com.github.pires.obd.commands.protocol.TimeoutCommand;
+import com.github.pires.obd.enums.ObdProtocols;
 
 
 import java.io.IOException;
@@ -162,10 +167,22 @@ public class MainActivity extends AppCompatActivity {
             try {
                 this.Socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
                 this.Socket.connect();
+
+                new EchoOffCommand().run(this.Socket.getInputStream(), this.Socket.getOutputStream());
+
+                new LineFeedOffCommand().run(this.Socket.getInputStream(), this.Socket.getOutputStream());
+
+                new TimeoutCommand(2000).run(this.Socket.getInputStream(), this.Socket.getOutputStream());
+
+                new SelectProtocolCommand(ObdProtocols.AUTO).run(this.Socket.getInputStream(), this.Socket.getOutputStream());
+
+
                 Toast.makeText(this, getString(R.string.status_bluetooth_ok), Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
                 this.Socket = null;
                 Toast.makeText(this, R.string.text_bluetooth_error_connecting, Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }

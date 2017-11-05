@@ -1,16 +1,20 @@
 package com.github.gabriel.obd2reader.classes;
 
+import com.github.pires.obd.commands.ObdCommand;
+
 public class SensorClass {
     public String id;
     public String name;
     public String description;
     public String value;
+    public ObdCommand cmd;
 
-    public SensorClass(String id, String name, String description, String value) {
+    public SensorClass(String id, String name, String description, String value, ObdCommand cmd) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.value = value;
+        this.cmd = cmd;
     }
 
     @Override
@@ -49,4 +53,8 @@ public class SensorClass {
     public void setValue(String value) {
         this.value = value;
     }
+
+    public ObdCommand getCmd() {return this.cmd;};
+
+    public void setCmd(ObdCommand cmd) {this.cmd = cmd;};
 }

@@ -61,12 +61,8 @@ public class MainAdapter extends RecyclerView.Adapter {
         return sensores != null ? sensores.size() : 0;
     }
 
-    private boolean sensor_added(String sensor_id){
+    public boolean sensor_added(String sensor_id){
         return this.sensor_keys.contains(sensor_id);
-    }
-
-    public int getSensorIndex(String sensor_id) {
-        return this.sensores.indexOf(this.sensor_keys.indexOf(sensor_id));
     }
 
     public void add(SensorClass sensorClass) {

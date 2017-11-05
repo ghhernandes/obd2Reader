@@ -43,7 +43,7 @@ public final class ObdConfig {
         cmds.add(new DistanceMILOnCommand());
         cmds.add(new DtcNumberCommand());
         cmds.add(new TimingAdvanceCommand());
-        cmds.add(new TroubleCodesCommand());
+        //cmds.add(new TroubleCodesCommand());
         cmds.add(new VinCommand());
 
         // Engine

@@ -1,6 +1,7 @@
 package com.github.gabriel.obd2reader.fragments;
 
 import android.app.Fragment;
+import android.hardware.Sensor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.GridLayoutManager;
@@ -16,6 +17,7 @@ import com.github.gabriel.obd2reader.adapters.MainAdapter;
 import com.github.gabriel.obd2reader.classes.SensorClass;
 import com.github.gabriel.obd2reader.config.ObdConfig;
 import com.github.pires.obd.commands.ObdCommand;
+import com.github.pires.obd.exceptions.ResponseException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,46 +28,70 @@ public class HomeFragment extends Fragment {
     private MainAdapter mAdapter = null;
     private MainActivity act = null;
     private List<SensorClass> sensores = null;
+    private LiveDataThread dataThread = null;
 
     public HomeFragment() {
+    }
+
+    private class LiveDataThread extends Thread {
+        @Override
+        public void run(){
+            while (!this.isInterrupted()){
+                for (final SensorClass sensorClass: sensores) {
+                    try {
+                        if ((act.liveDataActive) && (act.Socket != null) && (act.Socket.isConnected())) {
+
+                            sensorClass.cmd.run(act.Socket.getInputStream(), act.Socket.getOutputStream());
+                            final String value = sensorClass.cmd.getFormattedResult();
+                            if (!value.equals(sensorClass.getValue())){
+                                act.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mAdapter.update(sensores.indexOf(sensorClass), value);
+                                    }
+                                });
+                            }
+                        }
+
+                    } catch (IOException | InterruptedException | ResponseException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+//                try {
+//                    Thread.sleep(100);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+            }
+        }
     }
 
     private final Runnable liveDataThread = new Runnable() {
         @Override
         public void run() {
-            int position = 0;
-            for (final ObdCommand command: ObdConfig.getCommands()) {
+            for (final SensorClass sensorClass: sensores) {
                 try {
                     if ((act.liveDataActive) && (act.Socket != null) && (act.Socket.isConnected())) {
-                        command.run(act.Socket.getInputStream(), act.Socket.getOutputStream());
 
-                        final int finalPosition = position;
-                        new Handler().post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mAdapter.update(finalPosition, command.getFormattedResult());
-                            }
-                        });
+                        sensorClass.cmd.run(act.Socket.getInputStream(), act.Socket.getOutputStream());
+                        final String value = sensorClass.cmd.getFormattedResult();
+                        if (!value.equals(sensorClass.getValue())){
+                            new Handler().post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mAdapter.update(sensores.indexOf(sensorClass), value);
+                                }
+                            });
+                        }
                     }
-//
-//                    final int sensorpos = mAdapter.getSensorIndex(command.getCommandPID());
-//                    if (sensorpos > 0) {
-//                        new Handler().post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                mAdapter.update(sensorpos, command.getFormattedResult());
-//                            }
-//                        });
-//                    }
 
-                    position += 1;
-
-                } catch (IOException | InterruptedException e) {
+                } catch (IOException | InterruptedException | ResponseException e) {
                     e.printStackTrace();
                 }
             }
 
-            new Handler().postDelayed(liveDataThread, 1000);
+            new Handler().postDelayed(liveDataThread, 10000);
         }
     };
 
@@ -75,6 +101,15 @@ public class HomeFragment extends Fragment {
 
         this.act = ((MainActivity)getActivity());
         this.sensores = new ArrayList<>();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (this.dataThread != null) {
+            this.dataThread.interrupt();
+            this.dataThread = null;
+        }
     }
 
     @Override
@@ -103,7 +138,12 @@ public class HomeFragment extends Fragment {
         this.mAdapter = new MainAdapter(sensores, act);
         recyclerView.setAdapter(this.mAdapter);
 
-        new Handler().post(liveDataThread);
+//        new Handler().post(liveDataThread);
+
+        if (this.dataThread == null) {
+            this.dataThread = new LiveDataThread();
+            this.dataThread.start();
+        }
 
         return rootView;
     }
@@ -111,7 +151,7 @@ public class HomeFragment extends Fragment {
     private void insertDefaultSensors() {
         for (ObdCommand command: ObdConfig.getCommands()) {
             try {
-                this.sensores.add(new SensorClass(command.getCommandPID(), command.getName(), "", "N/A"));
+                this.sensores.add(new SensorClass(command.getCommandPID(), command.getName(), "", "N/A", command));
             } catch (Exception e) {
                 e.printStackTrace();
             }
