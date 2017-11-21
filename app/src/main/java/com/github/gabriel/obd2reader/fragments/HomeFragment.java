@@ -1,6 +1,7 @@
 package com.github.gabriel.obd2reader.fragments;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,8 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.github.gabriel.obd2reader.R;
+import com.github.gabriel.obd2reader.activities.FullscreenActivity;
 import com.github.gabriel.obd2reader.activities.MainActivity;
 import com.github.gabriel.obd2reader.adapters.MainAdapter;
+import com.github.gabriel.obd2reader.classes.RecyclerItemClickListener;
 import com.github.gabriel.obd2reader.classes.SensorClass;
 import com.github.gabriel.obd2reader.config.ObdConfig;
 import com.github.pires.obd.commands.ObdCommand;
@@ -29,6 +32,7 @@ public class HomeFragment extends Fragment {
     private MainActivity act = null;
     private List<SensorClass> sensores = null;
     private LiveDataThread dataThread = null;
+    private SensorClass fullscreen_sensor = null;
 
     public HomeFragment() {
     }
@@ -41,7 +45,9 @@ public class HomeFragment extends Fragment {
                     try {
                         if ((act.liveDataActive) && (act.Socket != null) && (act.Socket.isConnected())) {
 
-                            sensorClass.cmd.run(act.Socket.getInputStream(), act.Socket.getOutputStream());
+                            if (sensorClass.cmd != null)
+                                sensorClass.cmd.run(act.Socket.getInputStream(), act.Socket.getOutputStream());
+
                             final String value = sensorClass.cmd.getFormattedResult();
                             if (!value.equals(sensorClass.getValue())){
                                 act.runOnUiThread(new Runnable() {
@@ -57,43 +63,9 @@ public class HomeFragment extends Fragment {
                         e.printStackTrace();
                     }
                 }
-
-//                try {
-//                    Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
             }
         }
     }
-
-    private final Runnable liveDataThread = new Runnable() {
-        @Override
-        public void run() {
-            for (final SensorClass sensorClass: sensores) {
-                try {
-                    if ((act.liveDataActive) && (act.Socket != null) && (act.Socket.isConnected())) {
-
-                        sensorClass.cmd.run(act.Socket.getInputStream(), act.Socket.getOutputStream());
-                        final String value = sensorClass.cmd.getFormattedResult();
-                        if (!value.equals(sensorClass.getValue())){
-                            new Handler().post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mAdapter.update(sensores.indexOf(sensorClass), value);
-                                }
-                            });
-                        }
-                    }
-
-                } catch (IOException | InterruptedException | ResponseException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            new Handler().postDelayed(liveDataThread, 10000);
-        }
-    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -119,6 +91,16 @@ public class HomeFragment extends Fragment {
 
         RecyclerView recyclerView = rootView.findViewById(R.id.recycler);
 
+        recyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
+                @Override
+                    public void onItemClick(View view, int position){
+                        Intent intent = new Intent(getActivity(), FullscreenActivity.class);
+                        startActivity(intent);
+                }
+                })
+        );
+
         // aumenta performance se as alteracoes nao afetarem o tamanho do layout
         recyclerView.setHasFixedSize(true);
 
@@ -137,8 +119,6 @@ public class HomeFragment extends Fragment {
 
         this.mAdapter = new MainAdapter(sensores, act);
         recyclerView.setAdapter(this.mAdapter);
-
-//        new Handler().post(liveDataThread);
 
         if (this.dataThread == null) {
             this.dataThread = new LiveDataThread();

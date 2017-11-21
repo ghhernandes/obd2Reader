@@ -176,8 +176,7 @@ public class MainActivity extends AppCompatActivity {
 
                 new SelectProtocolCommand(ObdProtocols.AUTO).run(this.Socket.getInputStream(), this.Socket.getOutputStream());
 
-
-                Toast.makeText(this, getString(R.string.status_bluetooth_ok), Toast.LENGTH_SHORT).show();
+               Toast.makeText(this, getString(R.string.status_bluetooth_ok), Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
                 this.Socket = null;
                 Toast.makeText(this, R.string.text_bluetooth_error_connecting, Toast.LENGTH_SHORT).show();
