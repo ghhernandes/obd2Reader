@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         cardCornerRadius="2dp"
-        contentPadding="8dp">
+        contentPadding="15dp"
+        app:cardElevation="7dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="100dp">
 
             <TextView
                 android:id="@+id/main_card_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_centerVertical="true"
-                android:textAlignment="center"
-                android:background="@color/colorCardTitle"
-                android:textStyle="bold"/>
+
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="10dp"
+                android:textColor="#000"/>
 
             <TextView
                 android:id="@+id/main_card_value"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/main_card_name"
                 android:layout_margin="16dp"
-                android:gravity="center"
                 android:textColor="@color/colorPrimaryDark"
-                android:textStyle="italic"/>
+                android:textAppearance="@android:style/TextAppearance.Large"/>
 
 
         </RelativeLayout>

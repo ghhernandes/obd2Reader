@@ -21,7 +21,6 @@
                 android:layout_alignParentTop="true"
                 android:layout_centerVertical="true"
                 android:textAlignment="center"
-                android:background="@color/colorCardTitle"
                 android:textStyle="bold"/>
 
             <TextView

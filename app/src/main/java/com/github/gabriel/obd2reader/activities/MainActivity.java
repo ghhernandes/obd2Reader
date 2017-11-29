@@ -13,7 +13,10 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.github.gabriel.obd2reader.config.ObdConfig;
@@ -36,11 +39,14 @@ import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
-    private static boolean bluetoothDefaultIsEnable = false;
-    private boolean preRequisites = true;
-    private String BluetoothDeviceAddress = "";
+
+    //Bluetooth
     public BluetoothSocket Socket = null;
-    public Boolean liveDataActive = false;
+    public BluetoothAdapter Adapter = null;
+    public boolean preRequisites = true; //verifica se possui bluetooth e esta conectado
+    public Boolean liveDataActive = false; //thread verifica se esta true para executar
+    private String BluetoothDeviceAddress = ""; //bluetooth onde esta conectado
+    private boolean bluetoothDefaultEnabled = false; //verifica se o bluetooth estava ativo quando iniciou o apk
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -50,10 +56,14 @@ public class MainActivity extends AppCompatActivity {
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction();
 
+            FrameLayout frameLayout = (FrameLayout) findViewById(R.id.main_content);
+//            frameLayout.setBackgroundColor(getResources().getColor(R.color.colorBackground));
+
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     setTitle(R.string.title_home);
                     transaction.replace(R.id.main_content, new HomeFragment()).commit();
+//                    frameLayout.setBackgroundColor(getResources().getColor(R.color.colorCardBackground));
                     break;
                 case R.id.navigation_options:
                     setTitle(R.string.title_options);
@@ -64,7 +74,8 @@ public class MainActivity extends AppCompatActivity {
                     transaction.replace(R.id.main_content, new NotificationsFragment()).commit();
                     break;
             }
-
+            FrameLayout subframeLayout = (FrameLayout)findViewById(R.id.main_subcontent);
+            subframeLayout.setVisibility(View.INVISIBLE);
             return true;
         }
 
@@ -77,13 +88,25 @@ public class MainActivity extends AppCompatActivity {
 
         this.BluetoothDeviceAddress = "";
         this.Socket = null;
+        this.Adapter = BluetoothAdapter.getDefaultAdapter();
+        this.bluetoothDefaultEnabled = this.Adapter != null && this.Adapter.isEnabled();
+
+        Button button_connect = (Button) findViewById(R.id.main_connect_button);
+
+        button_connect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setTitle(R.string.title_options);
+                getFragmentManager().beginTransaction().
+                        replace(R.id.main_content, new PreferencesFragment()).commit();
+
+                FrameLayout frameLayout = (FrameLayout)findViewById(R.id.main_subcontent);
+                frameLayout.setVisibility(View.INVISIBLE);
+            }
+        });
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
-        final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (btAdapter != null)
-            bluetoothDefaultIsEnable = btAdapter.isEnabled();
 
     }
 
@@ -96,13 +119,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        preRequisites = btAdapter != null && btAdapter.isEnabled();
-
-//        if (!preRequisites) {
-//            preRequisites = btAdapter.enable();
-//        }
+        preRequisites = this.Adapter != null && this.Adapter.isEnabled();
 
         if (!preRequisites) {
             Toast.makeText(this, getString(R.string.text_bluetooth_disabled), Toast.LENGTH_SHORT).show();
@@ -114,9 +131,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         this.stopLiveData();
-        final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (btAdapter != null && btAdapter.isEnabled() && !bluetoothDefaultIsEnable)
-            btAdapter.disable();
+
+        if (this.Adapter != null && this.Adapter.isEnabled() && !this.bluetoothDefaultEnabled)
+            this.Adapter.disable();
     }
 
     @Override
@@ -161,8 +178,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void connectBluetoothDeviceAddress(String deviceAddress) {
         if ((this.Socket == null) || (!this.Socket.isConnected())) {
-            BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-            BluetoothDevice device = btAdapter.getRemoteDevice(deviceAddress);
+            BluetoothDevice device = this.Adapter.getRemoteDevice(deviceAddress);
             UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
             try {
                 this.Socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
@@ -188,15 +204,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startLiveData() {
-        ArrayList deviceStrs = new ArrayList();
-        final ArrayList devices = new ArrayList();
-
-        if (this.BluetoothDeviceAddress.equals("")) {
-            this.getBluetoothDevices(deviceStrs, devices);
-            this.showBluetoothDevicesDialog(deviceStrs, devices);
-        } else {
+        if (!this.BluetoothDeviceAddress.equals(""))
             connectBluetoothDeviceAddress(this.BluetoothDeviceAddress);
-        }
 
         if (preRequisites) {
             this.liveDataActive = true;

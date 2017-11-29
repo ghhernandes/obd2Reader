@@ -8,10 +8,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceFragment;
 
 import com.github.gabriel.obd2reader.R;
+import com.github.gabriel.obd2reader.activities.MainActivity;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -20,17 +22,13 @@ import java.util.Set;
 public class PreferencesFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int REQUEST_ENABLE_BT = 100;
-
-    BluetoothAdapter btAdapter;
     Set<BluetoothDevice> pairedDevices;
-//    Set<BluetoothDevice> discoveredDevices;
     ListPreference btDevicesList;
     ArrayList<CharSequence> entries;
     ArrayList<CharSequence> entryValues;
 
 
     public PreferencesFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -43,14 +41,28 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
 
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         getActivity().registerReceiver(btDiscoveryReceiver, filter);
+
+        //Protocolos
+        ArrayList<CharSequence> protocolEntries = new ArrayList<CharSequence>();
+        ArrayList<CharSequence> protocolValues = new ArrayList<CharSequence>();
+        protocolEntries.add("AUTO");
+        protocolValues.add("AUTO");
+        ListPreference obdProtocolsList = (ListPreference) findPreference("obd_protocols_preference");
+        obdProtocolsList.setEntries(listToArray(protocolEntries));
+        obdProtocolsList.setEntryValues(listToArray(protocolValues));
     }
 
     @Override
     public void onResume() {
         super.onResume();
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-        btAdapter = getBtAdapter();
-        findPreference("enable_bluetooth_preference").setEnabled(btAdapter != null);
+
+        findPreference("enable_bluetooth_preference").setEnabled(((MainActivity)getActivity()).Adapter != null);
+
+        CheckBoxPreference cbxBluetooth = (CheckBoxPreference) findPreference("enable_bluetooth_preference");
+        cbxBluetooth.setChecked(((MainActivity)getActivity()).Adapter.isEnabled());
+
+        this.onBluetoothCheckBoxChanged(cbxBluetooth.isChecked());
     }
 
     @Override
@@ -68,38 +80,31 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         if (s.equals("enable_bluetooth_preference")) {
-            if (sharedPreferences.getBoolean(s, false) == true) {
-                enableBluetooth();
-                findPairedDevices();
-                discoverDevices();
-                btDevicesList.setEnabled(true);
-            } else {
-                btAdapter.disable();
-                btDevicesList.setEnabled(false);
-            }
+            this.onBluetoothCheckBoxChanged(sharedPreferences.getBoolean(s, false) == true);
         }
     }
 
-    public BluetoothAdapter getBtAdapter() {
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
-            // nao suporta bluetooth
-            return null;
-        }
-        else {
-            return mBluetoothAdapter;
+    private void onBluetoothCheckBoxChanged(boolean Active) {
+        if (Active) {
+            enableBluetooth();
+            findPairedDevices();
+            discoverDevices();
+            btDevicesList.setEnabled(true);
+        } else {
+            ((MainActivity)getActivity()).Adapter.disable();
+            btDevicesList.setEnabled(false);
         }
     }
 
     public void enableBluetooth() {
-        if (!btAdapter.isEnabled()) {
+        if (!((MainActivity)getActivity()).Adapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
     }
 
     public void findPairedDevices() {
-        pairedDevices = btAdapter.getBondedDevices();
+        pairedDevices = ((MainActivity)getActivity()).Adapter.getBondedDevices();
         entries = new ArrayList<CharSequence>();
         entryValues = new ArrayList<CharSequence>();
         for (BluetoothDevice d : pairedDevices) {
@@ -111,7 +116,7 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
     }
 
     public void discoverDevices() {
-        btAdapter.startDiscovery();
+        ((MainActivity)getActivity()).Adapter.startDiscovery();
     }
 
     public CharSequence[] listToArray(ArrayList<CharSequence> list) {

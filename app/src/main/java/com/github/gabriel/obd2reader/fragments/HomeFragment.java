@@ -2,21 +2,18 @@ package com.github.gabriel.obd2reader.fragments;
 
 import android.app.Fragment;
 import android.content.Intent;
-import android.hardware.Sensor;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.github.gabriel.obd2reader.R;
-import com.github.gabriel.obd2reader.activities.FullscreenActivity;
 import com.github.gabriel.obd2reader.activities.MainActivity;
 import com.github.gabriel.obd2reader.adapters.MainAdapter;
-import com.github.gabriel.obd2reader.classes.RecyclerItemClickListener;
 import com.github.gabriel.obd2reader.classes.SensorClass;
 import com.github.gabriel.obd2reader.config.ObdConfig;
 import com.github.pires.obd.commands.ObdCommand;
@@ -91,16 +88,6 @@ public class HomeFragment extends Fragment {
 
         RecyclerView recyclerView = rootView.findViewById(R.id.recycler);
 
-        recyclerView.addOnItemTouchListener(
-                new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
-                @Override
-                    public void onItemClick(View view, int position){
-                        Intent intent = new Intent(getActivity(), FullscreenActivity.class);
-                        startActivity(intent);
-                }
-                })
-        );
-
         // aumenta performance se as alteracoes nao afetarem o tamanho do layout
         recyclerView.setHasFixedSize(true);
 
@@ -108,10 +95,10 @@ public class HomeFragment extends Fragment {
 //                LinearLayoutManager.VERTICAL, false);
 
         //grid escalavel
-//        StaggeredGridLayoutManager layoutManager =
-//                new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        StaggeredGridLayoutManager layoutManager =
+                new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
 
-        GridLayoutManager layoutManager = new GridLayoutManager(act, 2);
+//        GridLayoutManager layoutManager = new GridLayoutManager(act, 2);
 
         recyclerView.setLayoutManager(layoutManager);
 
