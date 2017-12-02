@@ -37,14 +37,8 @@ public final class ObdConfig {
     public static ArrayList<ObdCommand> getCommands() {
         ArrayList<ObdCommand> cmds = new ArrayList<>();
 
-        // Control
-        cmds.add(new ModuleVoltageCommand());
-        cmds.add(new EquivalentRatioCommand());
-        cmds.add(new DistanceMILOnCommand());
-        cmds.add(new DtcNumberCommand());
-        cmds.add(new TimingAdvanceCommand());
-        //cmds.add(new TroubleCodesCommand());
-        cmds.add(new VinCommand());
+        // Misc
+        cmds.add(new SpeedCommand());
 
         // Engine
         cmds.add(new LoadCommand());
@@ -52,6 +46,21 @@ public final class ObdConfig {
         cmds.add(new RuntimeCommand());
         cmds.add(new MassAirFlowCommand());
         cmds.add(new ThrottlePositionCommand());
+
+        // Temperature
+        cmds.add(new AirIntakeTemperatureCommand());
+        cmds.add(new AmbientAirTemperatureCommand());
+        cmds.add(new EngineCoolantTemperatureCommand());
+
+        // Control
+        cmds.add(new ModuleVoltageCommand());
+        cmds.add(new EquivalentRatioCommand());
+        cmds.add(new DistanceMILOnCommand());
+        //cmds.add(new DtcNumberCommand());
+        cmds.add(new TimingAdvanceCommand());
+        //cmds.add(new TroubleCodesCommand());
+        cmds.add(new VinCommand());
+
 
         // Fuel
         cmds.add(new FindFuelTypeCommand());
@@ -75,13 +84,7 @@ public final class ObdConfig {
         cmds.add(new FuelRailPressureCommand());
         cmds.add(new IntakeManifoldPressureCommand());
 
-        // Temperature
-        cmds.add(new AirIntakeTemperatureCommand());
-        cmds.add(new AmbientAirTemperatureCommand());
-        cmds.add(new EngineCoolantTemperatureCommand());
 
-        // Misc
-        cmds.add(new SpeedCommand());
 
 
         return cmds;

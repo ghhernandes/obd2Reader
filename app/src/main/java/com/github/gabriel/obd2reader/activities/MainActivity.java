@@ -91,22 +91,20 @@ public class MainActivity extends AppCompatActivity {
         this.Adapter = BluetoothAdapter.getDefaultAdapter();
         this.bluetoothDefaultEnabled = this.Adapter != null && this.Adapter.isEnabled();
 
+        final BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
         Button button_connect = (Button) findViewById(R.id.main_connect_button);
 
         button_connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setTitle(R.string.title_options);
-                getFragmentManager().beginTransaction().
-                        replace(R.id.main_content, new PreferencesFragment()).commit();
+                navigation.findViewById(R.id.navigation_options).performClick();
 
                 FrameLayout frameLayout = (FrameLayout)findViewById(R.id.main_subcontent);
                 frameLayout.setVisibility(View.INVISIBLE);
             }
         });
-
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
     }
 
@@ -123,8 +121,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (!preRequisites) {
             Toast.makeText(this, getString(R.string.text_bluetooth_disabled), Toast.LENGTH_SHORT).show();
-        }else{
-            this.startLiveData();
         }
     }
     @Override
@@ -140,40 +136,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         this.stopLiveData();
-    }
-
-    public void getBluetoothDevices(ArrayList aDeviceStrs, final ArrayList devices) {
-        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
-        if (pairedDevices.size() > 0)
-        {
-            for (BluetoothDevice device : pairedDevices)
-            {
-                aDeviceStrs.add(device.getName());
-                devices.add(device.getAddress());
-            }
-        }
-    };
-
-    public void showBluetoothDevicesDialog (ArrayList aDeviceStrs, final ArrayList devices) {
-        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-
-        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.select_dialog_singlechoice,
-                aDeviceStrs.toArray(new String[aDeviceStrs.size()]));
-
-        alertDialog.setSingleChoiceItems(adapter, -1, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
-                dialog.dismiss();
-                int position = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
-                BluetoothDeviceAddress = (String) devices.get(position);
-                connectBluetoothDeviceAddress(BluetoothDeviceAddress);
-            }
-        });
-
-        alertDialog.setTitle(R.string.bluetooth_choose);
-        alertDialog.show();
     }
 
     public void connectBluetoothDeviceAddress(String deviceAddress) {
@@ -193,7 +155,9 @@ public class MainActivity extends AppCompatActivity {
                 new SelectProtocolCommand(ObdProtocols.AUTO).run(this.Socket.getInputStream(), this.Socket.getOutputStream());
 
                Toast.makeText(this, getString(R.string.status_bluetooth_ok), Toast.LENGTH_SHORT).show();
+               this.liveDataActive = true;
             } catch (IOException e) {
+                this.liveDataActive = false;
                 this.Socket = null;
                 Toast.makeText(this, R.string.text_bluetooth_error_connecting, Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
@@ -203,17 +167,41 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void startLiveData() {
-        if (!this.BluetoothDeviceAddress.equals(""))
+    public void startLiveData() {
+        if ((!this.liveDataActive) && (!this.BluetoothDeviceAddress.equals("")))
             connectBluetoothDeviceAddress(this.BluetoothDeviceAddress);
 
-        if (preRequisites) {
-            this.liveDataActive = true;
-        }
     }
 
     private void stopLiveData() {
         this.liveDataActive = false;
+    }
+
+    public void closeConnection() throws IOException{
+        this.liveDataActive = false;
+
+        if (this.Socket != null)
+            this.Socket.close();
+
+        this.Socket = null;
+    }
+
+    public boolean deviceIsConnected() {
+        return (this.Socket != null) && (this.Socket.isConnected());
+    }
+
+    public void setSelectedBluetoothDevice(String device) throws IOException {
+        this.BluetoothDeviceAddress = device;
+        if (this.deviceIsConnected()){
+            this.closeConnection();
+            this.startLiveData();
+        }else if (this.Socket != null){
+            this.liveDataActive = false;
+            this.Socket = null;
+            this.startLiveData();
+        }else{
+            this.startLiveData();
+        }
     }
 
 }

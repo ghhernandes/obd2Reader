@@ -10,11 +10,13 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
+import android.preference.Preference;
 import android.preference.PreferenceFragment;
 
 import com.github.gabriel.obd2reader.R;
 import com.github.gabriel.obd2reader.activities.MainActivity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -38,6 +40,19 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
         addPreferencesFromResource(R.xml.preferences);
 
         btDevicesList = (ListPreference) findPreference("bluetooth_list_preference");
+        btDevicesList.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object o) {
+                try {
+                    ((MainActivity)getActivity()).setSelectedBluetoothDevice(btDevicesList.getValue());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                ((MainActivity)getActivity()).startLiveData();
+                return true;
+            }
+        });
+
 
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         getActivity().registerReceiver(btDiscoveryReceiver, filter);
