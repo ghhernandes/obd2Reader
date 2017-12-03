@@ -2,15 +2,12 @@ package com.github.gabriel.obd2reader.fragments;
 
 
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.github.gabriel.obd2reader.R;
-import com.github.gabriel.obd2reader.activities.TroubleCodesActivity;
 
 public class NotificationsFragment extends Fragment {
 

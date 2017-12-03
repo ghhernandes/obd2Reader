@@ -3,13 +3,18 @@
     <string name="title_home">Início</string>
     <string name="title_options">Opções</string>
     <string name="title_notifications">Notificações</string>
+    <string name="title_trouble_codes">Trouble Codes</string>
     <string name="bluetooth_actived">Bluetooth ativado</string>
     <string name="bluetooth_desactived">Bluetooth desativado</string>
     <string name="bluetooth_unsupported">Bluetooth não suportado</string>
     <string name="bluetooth_choose">Escolha o dispositivo Bluetooth</string>
-    <string name="action_settings">Settings</string>
+    <string name="text_dtc_no_data">Nenhum DTC armazenado</string>
+    <string name="text_noerrors">Nenhum erro encontrado</string>
+    <string name="text_obd_command_failure">Erro no comando OBD!</string>
+    <string name="text_bluetooth_nodevice">Nenhum dispositivo Bluetooth selecionado</string>
+    <string name="socket_disconnected_error">Conexão falhou. Conecte-se novamente.</string>
+    <string name="action_settings">Configurações</string>
     <string name="action_clear_codes">Limpar códigos</string>
-    <string name="title_activity_trouble_codes">Trouble Codes</string>
     <string name="text_consumption_default" translatable="false">0l/100km</string>
     <string name="text_runtime_default" translatable="false">00:00:00</string>
     <string name="title_pref_obd">Preferências do OBD-II</string>
@@ -17,6 +22,7 @@
     <string name="title_pref_bluetooth" translatable="false">Bluetooth</string>
     <string name="text_bluetooth_disabled">Bluetooth desabilitado.</string>
     <string name="text_bluetooth_error_connecting">Não foi possível conectar ao dispositivo.</string>
+    <string name="text_bluetooth_error_reading">Não foi possível obter informações.</string>
     <string name="status_bluetooth_ok">Pronto</string>
     <string name="status_bluetooth_connecting">Conectando&#8230;</string>
     <string name="status_bluetooth_connected">Conectado</string>
@@ -25,8 +31,8 @@
     <string name="pref_bluetooth_title">Bluetooth ativo</string>
     <string name="pref_bluetooth_summaryOff">Ativa ou desativa o Bluetooth</string>
     <string name="pref_bluetooth_summaryOn">Desligar o Bluetooth</string>
-    <string name="pref_bluetooth_list_devices_summary">Lista de dispositivos pareados disponíveis</string>
-    <string name="pref_bluetooth_list_devices_title">Dispositivos pareados</string>
+    <string name="pref_bluetooth_list_devices_summary">Selecione um dispositivo para se conectar</string>
+    <string name="pref_bluetooth_list_devices_title">Conectar</string>
     <string name="pref_obd_protocols_title">Protocolos</string>
     <string name="pref_obd_protocols_summary">Selecione o Protocolo OBD-II</string>
     <string name="pref_imperial_units_title">Unidades Imperiais</string>
@@ -44,4 +50,7 @@
     <string name="starting_live_data_failure">Falha ao iniciar transmissão em tempo real</string>
     <string name="return_button">Voltar</string>
     <string name="btn_connect_bluetooth">Conectar</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -1,46 +1,43 @@
 package com.github.gabriel.obd2reader.activities;
-import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
-import com.github.gabriel.obd2reader.config.ObdConfig;
 import com.github.gabriel.obd2reader.fragments.HomeFragment;
 import com.github.gabriel.obd2reader.fragments.NotificationsFragment;
 import com.github.gabriel.obd2reader.R;
 import com.github.gabriel.obd2reader.fragments.PreferencesFragment;
-import com.github.pires.obd.commands.ObdCommand;
+import com.github.gabriel.obd2reader.fragments.TroubleCodesFragment;
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
 import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.enums.ObdProtocols;
-
+import com.github.pires.obd.exceptions.NoDataException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-
-import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
+    private final FragmentManager fragmentManager = getFragmentManager();
+    private Fragment fragment = null;
 
     //Bluetooth
+    private UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     public BluetoothSocket Socket = null;
     public BluetoothAdapter Adapter = null;
     public boolean preRequisites = true; //verifica se possui bluetooth e esta conectado
@@ -48,30 +45,93 @@ public class MainActivity extends AppCompatActivity {
     private String BluetoothDeviceAddress = ""; //bluetooth onde esta conectado
     private boolean bluetoothDefaultEnabled = false; //verifica se o bluetooth estava ativo quando iniciou o apk
 
+    private class ConectarLeitorTask extends AsyncTask<String, Integer, Integer>{
+        private MainActivity mainActivity;
+        private String deviceAddress;
+
+        public ConectarLeitorTask(MainActivity mainActivity, String deviceAddress) {
+            Log.i("ConectarLeitorTask", "onCreate");
+            this.mainActivity = mainActivity;
+            this.deviceAddress = deviceAddress;
+        }
+
+        @Override
+        protected Integer doInBackground(String... strings) {
+            Log.i("ConectarLeitorTask", "Conectado...");
+            BluetoothDevice device = this.mainActivity.Adapter.getRemoteDevice(deviceAddress);
+            try {
+
+                this.mainActivity.Socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
+                this.mainActivity.Socket.connect();
+
+                new EchoOffCommand().run(this.mainActivity.Socket.getInputStream(), this.mainActivity.Socket.getOutputStream());
+
+                new LineFeedOffCommand().run(this.mainActivity.Socket.getInputStream(), this.mainActivity.Socket.getOutputStream());
+
+                new TimeoutCommand(2000).run(this.mainActivity.Socket.getInputStream(), this.mainActivity.Socket.getOutputStream());
+
+                new SelectProtocolCommand(ObdProtocols.AUTO).run(this.mainActivity.Socket.getInputStream(), this.mainActivity.Socket.getOutputStream());
+            } catch (IOException | NoDataException | InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result){
+            if (this.mainActivity.deviceIsConnected()) {
+                Toast.makeText(this.mainActivity, getString(R.string.status_bluetooth_ok), Toast.LENGTH_SHORT).show();
+                mainActivity.liveDataActive = true;
+                Log.d("ConectarLeitorTask", "Conectado.");
+            }else {
+                try {
+                    this.mainActivity.closeConnection();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Log.d("ConectarLeitorTask", "Desconectado.");
+                Toast.makeText(this.mainActivity, R.string.text_bluetooth_error_connecting, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            FragmentManager fragmentManager = getFragmentManager();
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-            FrameLayout frameLayout = (FrameLayout) findViewById(R.id.main_content);
-//            frameLayout.setBackgroundColor(getResources().getColor(R.color.colorBackground));
+            final FragmentTransaction transaction = fragmentManager.beginTransaction();
 
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     setTitle(R.string.title_home);
-                    transaction.replace(R.id.main_content, new HomeFragment()).commit();
-//                    frameLayout.setBackgroundColor(getResources().getColor(R.color.colorCardBackground));
+
+                    if (!(fragment instanceof HomeFragment)) {
+                        fragment = new HomeFragment();
+                        transaction.replace(R.id.main_content, fragment).commit();
+                    }
+
                     break;
                 case R.id.navigation_options:
                     setTitle(R.string.title_options);
-                    transaction.replace(R.id.main_content, new PreferencesFragment()).commit();
+                    if (!(fragment instanceof PreferencesFragment)) {
+                        fragment = new PreferencesFragment();
+                        transaction.replace(R.id.main_content, fragment).commit();
+                    }
                     break;
                 case R.id.navigation_notifications:
                     setTitle(R.string.title_notifications);
-                    transaction.replace(R.id.main_content, new NotificationsFragment()).commit();
+                    if (!(fragment instanceof NotificationsFragment)) {
+                        fragment = new NotificationsFragment();
+                        transaction.replace(R.id.main_content, fragment).commit();
+                    }
+                    break;
+                case R.id.navigation_troublecodes:
+                    setTitle(R.string.title_trouble_codes);
+                    if (!(fragment instanceof TroubleCodesFragment)) {
+                        fragment = new TroubleCodesFragment();
+                        transaction.replace(R.id.main_content, fragment).commit();
+                    }
                     break;
             }
             FrameLayout subframeLayout = (FrameLayout)findViewById(R.id.main_subcontent);
@@ -140,34 +200,23 @@ public class MainActivity extends AppCompatActivity {
 
     public void connectBluetoothDeviceAddress(String deviceAddress) {
         if ((this.Socket == null) || (!this.Socket.isConnected())) {
-            BluetoothDevice device = this.Adapter.getRemoteDevice(deviceAddress);
-            UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-            try {
-                this.Socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
-                this.Socket.connect();
-
-                new EchoOffCommand().run(this.Socket.getInputStream(), this.Socket.getOutputStream());
-
-                new LineFeedOffCommand().run(this.Socket.getInputStream(), this.Socket.getOutputStream());
-
-                new TimeoutCommand(2000).run(this.Socket.getInputStream(), this.Socket.getOutputStream());
-
-                new SelectProtocolCommand(ObdProtocols.AUTO).run(this.Socket.getInputStream(), this.Socket.getOutputStream());
-
-               Toast.makeText(this, getString(R.string.status_bluetooth_ok), Toast.LENGTH_SHORT).show();
-               this.liveDataActive = true;
-            } catch (IOException e) {
-                this.liveDataActive = false;
-                this.Socket = null;
-                Toast.makeText(this, R.string.text_bluetooth_error_connecting, Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            Toast.makeText(this, R.string.status_bluetooth_connecting, Toast.LENGTH_LONG).show();
+            ConectarLeitorTask conectarLeitorTask = new ConectarLeitorTask(this, deviceAddress);
+            conectarLeitorTask.execute("");
         }
     }
 
-    public void startLiveData() {
+    public void disconnectBluetoothDevice() throws IOException {
+        this.liveDataActive = false;
+
+        if (this.Socket != null)
+            this.Socket.close();
+
+        this.Socket = null;
+        Toast.makeText(this, getString(R.string.socket_disconnected_error), Toast.LENGTH_LONG).show();
+    }
+
+    private void startLiveData() {
         if ((!this.liveDataActive) && (!this.BluetoothDeviceAddress.equals("")))
             connectBluetoothDeviceAddress(this.BluetoothDeviceAddress);
 

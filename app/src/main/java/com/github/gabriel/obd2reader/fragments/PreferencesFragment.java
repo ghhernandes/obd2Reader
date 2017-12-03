@@ -12,6 +12,7 @@ import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.widget.Toast;
 
 import com.github.gabriel.obd2reader.R;
 import com.github.gabriel.obd2reader.activities.MainActivity;
@@ -48,7 +49,6 @@ public class PreferencesFragment extends PreferenceFragment implements SharedPre
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                ((MainActivity)getActivity()).startLiveData();
                 return true;
             }
         });

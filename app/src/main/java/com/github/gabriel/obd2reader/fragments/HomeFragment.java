@@ -7,6 +7,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,8 @@ import com.github.gabriel.obd2reader.adapters.MainAdapter;
 import com.github.gabriel.obd2reader.classes.SensorClass;
 import com.github.gabriel.obd2reader.config.ObdConfig;
 import com.github.pires.obd.commands.ObdCommand;
-import com.github.pires.obd.exceptions.ResponseException;
+import com.github.pires.obd.exceptions.NoDataException;
+import com.github.pires.obd.exceptions.NonNumericResponseException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,7 +31,6 @@ public class HomeFragment extends Fragment {
     private MainActivity act = null;
     private List<SensorClass> sensores = null;
     private LiveDataThread dataThread = null;
-    private SensorClass fullscreen_sensor = null;
 
     public HomeFragment() {
     }
@@ -40,12 +41,16 @@ public class HomeFragment extends Fragment {
             while (!this.isInterrupted()){
                 for (final SensorClass sensorClass: sensores) {
                     try {
-                        if ((act.liveDataActive) && (act.Socket != null) && (act.Socket.isConnected())) {
+                        if (act.liveDataActive) {
+                            if (sensorClass.getCmd() != null) {
+                                try {
+                                    sensorClass.getCmd().run(act.Socket.getInputStream(), act.Socket.getOutputStream());
+                                } catch (NonNumericResponseException | NoDataException | IndexOutOfBoundsException e) {
+                                    e.printStackTrace();
+                                }
+                            }
 
-                            if (sensorClass.cmd != null)
-                                sensorClass.cmd.run(act.Socket.getInputStream(), act.Socket.getOutputStream());
-
-                            final String value = sensorClass.cmd.getFormattedResult();
+                            final String value = sensorClass.getCmd().getFormattedResult();
                             if (!value.equals(sensorClass.getValue())){
                                 act.runOnUiThread(new Runnable() {
                                     @Override
@@ -55,8 +60,20 @@ public class HomeFragment extends Fragment {
                                 });
                             }
                         }
-
-                    } catch (IOException | InterruptedException | ResponseException e) {
+                    } catch (Exception e) {
+                        if (e.getMessage().toLowerCase().contains("broken pipe"))
+                            act.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        act.disconnectBluetoothDevice();
+                                        interrupt();
+                                    } catch (IOException e1) {
+                                        Log.i("LiveDataThread", "Erro ao desconectar. "+e1.getMessage());
+                                        e1.printStackTrace();
+                                    }
+                                }
+                            });
                         e.printStackTrace();
                     }
                 }
@@ -70,6 +87,12 @@ public class HomeFragment extends Fragment {
 
         this.act = ((MainActivity)getActivity());
         this.sensores = new ArrayList<>();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        ((MainActivity)getActivity()).liveDataActive = false;
     }
 
     @Override
@@ -102,12 +125,14 @@ public class HomeFragment extends Fragment {
 
         recyclerView.setLayoutManager(layoutManager);
 
+        ((MainActivity)getActivity()).liveDataActive = ((MainActivity)getActivity()).deviceIsConnected();
+
         this.insertDefaultSensors();
 
         this.mAdapter = new MainAdapter(sensores, act);
         recyclerView.setAdapter(this.mAdapter);
 
-        if (this.dataThread == null) {
+        if ((this.dataThread == null) && ((MainActivity)getActivity()).liveDataActive) {
             this.dataThread = new LiveDataThread();
             this.dataThread.start();
         }
@@ -116,6 +141,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void insertDefaultSensors() {
+        this.sensores.clear();
         for (ObdCommand command: ObdConfig.getCommands()) {
             try {
                 this.sensores.add(new SensorClass(command.getCommandPID(), command.getName(), "", "N/A", command));

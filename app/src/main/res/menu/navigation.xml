@@ -15,6 +15,10 @@
         android:id="@+id/navigation_options"
         android:icon="@drawable/ic_dashboard_black_24dp"
         android:title="@string/title_options" />
+    <item
+        android:id="@+id/navigation_troublecodes"
+        android:icon="@drawable/ic_error_black_24dp"
+        android:title="@string/title_trouble_codes" />
 
 
 
