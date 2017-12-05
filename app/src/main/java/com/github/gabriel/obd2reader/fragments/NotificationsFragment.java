@@ -11,6 +11,7 @@ import com.github.gabriel.obd2reader.R;
 
 public class NotificationsFragment extends Fragment {
 
+    private View rootView;
 
     public NotificationsFragment() {
     }
@@ -23,18 +24,9 @@ public class NotificationsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_notifications, container, false);
+        this.rootView = inflater.inflate(R.layout.fragment_notifications, container, false);
 
-//        FloatingActionButton fab = rootView.findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(getActivity(), TroubleCodesActivity.class);
-//                startActivity(intent);
-//            }
-//        });
-
-        return rootView;
+        return this.rootView;
     }
 
 }

@@ -24,6 +24,7 @@ import com.github.gabriel.obd2reader.fragments.PreferencesFragment;
 import com.github.gabriel.obd2reader.fragments.TroubleCodesFragment;
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
+import com.github.pires.obd.commands.protocol.ObdResetCommand;
 import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.enums.ObdProtocols;
@@ -63,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
 
                 this.mainActivity.Socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
                 this.mainActivity.Socket.connect();
+
+                new ObdResetCommand().run(this.mainActivity.Socket.getInputStream(), this.mainActivity.Socket.getOutputStream());
 
                 new EchoOffCommand().run(this.mainActivity.Socket.getInputStream(), this.mainActivity.Socket.getOutputStream());
 
@@ -201,19 +204,25 @@ public class MainActivity extends AppCompatActivity {
     public void connectBluetoothDeviceAddress(String deviceAddress) {
         if ((this.Socket == null) || (!this.Socket.isConnected())) {
             Toast.makeText(this, R.string.status_bluetooth_connecting, Toast.LENGTH_LONG).show();
-            ConectarLeitorTask conectarLeitorTask = new ConectarLeitorTask(this, deviceAddress);
-            conectarLeitorTask.execute("");
+
+            if (!deviceAddress.equals(""))
+                deviceAddress = this.BluetoothDeviceAddress;
+
+            if (!deviceAddress.equals("")) {
+                ConectarLeitorTask conectarLeitorTask = new ConectarLeitorTask(this, deviceAddress);
+                conectarLeitorTask.execute("");
+            }
         }
     }
 
     public void disconnectBluetoothDevice() throws IOException {
         this.liveDataActive = false;
 
-        if (this.Socket != null)
+        if (this.Socket != null) {
             this.Socket.close();
-
-        this.Socket = null;
-        Toast.makeText(this, getString(R.string.socket_disconnected_error), Toast.LENGTH_LONG).show();
+            this.Socket = null;
+            Toast.makeText(this, getString(R.string.socket_disconnected_error), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void startLiveData() {

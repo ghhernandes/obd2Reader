@@ -15,9 +15,14 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.github.gabriel.obd2reader.R;
+import com.github.gabriel.obd2reader.activities.MainActivity;
 import com.github.pires.obd.commands.control.TroubleCodesCommand;
 import com.github.pires.obd.commands.protocol.ResetTroubleCodesCommand;
+import com.github.pires.obd.exceptions.MisunderstoodCommandException;
+import com.github.pires.obd.exceptions.NoDataException;
+import com.github.pires.obd.exceptions.UnableToConnectException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +41,7 @@ public class TroubleCodesFragment extends Fragment {
     private static final int OBD_COMMAND_FAILURE_MIS = 14;
     private static final int OBD_COMMAND_FAILURE_NODATA = 15;
 
+    private GetTroubleCodesTask gtct;
     private View rootView;
 
     private Handler mHandler = new Handler(new Handler.Callback() {
@@ -82,17 +88,65 @@ public class TroubleCodesFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            Toast.makeText(getActivity(), "SDFSDFSDF", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "onPreExecute");
         }
 
         @Override
-        protected String doInBackground(String... strings) {
-            return null;
+        protected String doInBackground(String... params) {
+            String result = "";
+            synchronized (this) {
+                Log.d(TAG, "doInBackground");
+                try {
+                    ((MainActivity) getActivity()).connectBluetoothDeviceAddress("");
+                } catch (Exception e){
+                    Log.e(TAG, "Erro ao estabeler conexão. -> "+e.getMessage());
+                    mHandler.obtainMessage(CANNOT_CONNECT_TO_DEVICE).sendToTarget();
+                }
+
+                try {
+
+                    ModifiedTroubleCodesObdCommand tcoc = new ModifiedTroubleCodesObdCommand();
+                    tcoc.run(((MainActivity)getActivity()).Socket.getInputStream(), ((MainActivity)getActivity()).Socket.getOutputStream());
+                    result = tcoc.getFormattedResult();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e("DTCERR", e.getMessage());
+                    mHandler.obtainMessage(OBD_COMMAND_FAILURE_IO).sendToTarget();
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    Log.e("DTCERR", e.getMessage());
+                    mHandler.obtainMessage(OBD_COMMAND_FAILURE_IE).sendToTarget();
+
+                } catch (UnableToConnectException e) {
+                    e.printStackTrace();
+                    Log.e("DTCERR", e.getMessage());
+                    mHandler.obtainMessage(OBD_COMMAND_FAILURE_UTC).sendToTarget();
+
+                } catch (MisunderstoodCommandException e) {
+                    e.printStackTrace();
+                    Log.e("DTCERR", e.getMessage());
+                    mHandler.obtainMessage(OBD_COMMAND_FAILURE_MIS).sendToTarget();
+
+                } catch (NoDataException e) {
+                    Log.e("DTCERR", e.getMessage());
+                    mHandler.obtainMessage(OBD_COMMAND_FAILURE_NODATA).sendToTarget();
+
+                } catch (Exception e) {
+                    Log.e("DTCERR", e.getMessage());
+                    mHandler.obtainMessage(OBD_COMMAND_FAILURE).sendToTarget();
+
+                }
+
+            }
+            return result;
         }
 
         @Override
         protected void onPostExecute(String result) {
-             mHandler.obtainMessage(DATA_OK, result).sendToTarget();
+            mHandler.obtainMessage(DATA_OK, result).sendToTarget();
+            //getActivity().setContentView(R.layout.fragment_trouble_codes);
         }
     }
 
@@ -120,6 +174,9 @@ public class TroubleCodesFragment extends Fragment {
                              Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.fragment_trouble_codes, container, false);
 
+
+        this.gtct = new GetTroubleCodesTask();
+        this.gtct.execute("");
         return this.rootView;
     }
 

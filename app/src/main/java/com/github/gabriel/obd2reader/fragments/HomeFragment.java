@@ -1,10 +1,7 @@
 package com.github.gabriel.obd2reader.fragments;
 
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
@@ -31,6 +28,11 @@ public class HomeFragment extends Fragment {
     private MainActivity act = null;
     private List<SensorClass> sensores = null;
     private LiveDataThread dataThread = null;
+
+    public List<SensorClass> getSensores() {
+        return this.sensores;
+    }
+
 
     public HomeFragment() {
     }
