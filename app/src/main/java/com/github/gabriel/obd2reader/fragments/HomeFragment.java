@@ -21,6 +21,9 @@ import com.github.pires.obd.exceptions.NonNumericResponseException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class HomeFragment extends Fragment {
 
@@ -43,7 +46,7 @@ public class HomeFragment extends Fragment {
             while (!this.isInterrupted()){
                 for (final SensorClass sensorClass: sensores) {
                     try {
-                        if (act.liveDataActive) {
+                        if ((act.liveDataActive) && (!this.isInterrupted())) {
                             if (sensorClass.getCmd() != null) {
                                 try {
                                     sensorClass.getCmd().run(act.Socket.getInputStream(), act.Socket.getOutputStream());
@@ -53,7 +56,7 @@ public class HomeFragment extends Fragment {
                             }
 
                             final String value = sensorClass.getCmd().getFormattedResult();
-                            if (!value.equals(sensorClass.getValue())){
+                            if (!value.equals(sensorClass.getValue()) && (!this.isInterrupted())) {
                                 act.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -62,13 +65,15 @@ public class HomeFragment extends Fragment {
                                 });
                             }
                         }
+                    } catch (InterruptedException ie){
+                        interrupt();
                     } catch (Exception e) {
                         if (e.getMessage().toLowerCase().contains("broken pipe"))
                             act.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     try {
-                                        act.disconnectBluetoothDevice();
+                                        act.disconnectBluetoothDevice(true);
                                         interrupt();
                                     } catch (IOException e1) {
                                         Log.i("LiveDataThread", "Erro ao desconectar. "+e1.getMessage());
@@ -95,15 +100,16 @@ public class HomeFragment extends Fragment {
     public void onPause() {
         super.onPause();
         ((MainActivity)getActivity()).liveDataActive = false;
+
+        if (this.dataThread != null) {
+            this.dataThread.interrupt();
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (this.dataThread != null) {
-            this.dataThread.interrupt();
-            this.dataThread = null;
-        }
+        this.dataThread = null;
     }
 
     @Override
@@ -127,17 +133,28 @@ public class HomeFragment extends Fragment {
 
         recyclerView.setLayoutManager(layoutManager);
 
-        ((MainActivity)getActivity()).liveDataActive = ((MainActivity)getActivity()).deviceIsConnected();
-
         this.insertDefaultSensors();
 
         this.mAdapter = new MainAdapter(sensores, act);
         recyclerView.setAdapter(this.mAdapter);
 
+        if (!((MainActivity) getActivity()).deviceIsConnected())
+            ((MainActivity) getActivity()).connectBluetoothDeviceAddress("");
+
+        ((MainActivity)getActivity()).liveDataActive = ((MainActivity)getActivity()).deviceIsConnected();
+
+
+        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+
         if ((this.dataThread == null) && ((MainActivity)getActivity()).liveDataActive) {
-            this.dataThread = new LiveDataThread();
-            this.dataThread.start();
-        }
+           new Timer().schedule(new TimerTask() {
+               @Override
+               public void run() {
+                   dataThread = new LiveDataThread();
+                   dataThread.start();
+               }
+           }, 1000);
+        };
 
         return rootView;
     }

@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.github.gabriel.obd2reader.R;
 import com.github.gabriel.obd2reader.activities.MainActivity;
+import com.github.gabriel.obd2reader.classes.ModifiedTroubleCodesObdCommand;
 import com.github.pires.obd.commands.control.TroubleCodesCommand;
 import com.github.pires.obd.commands.protocol.ResetTroubleCodesCommand;
 import com.github.pires.obd.exceptions.MisunderstoodCommandException;
@@ -26,6 +27,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class TroubleCodesFragment extends Fragment {
     private static final String TAG = TroubleCodesFragment.class.getName();
@@ -49,34 +52,44 @@ public class TroubleCodesFragment extends Fragment {
             Log.d(TAG, "Message received on handler");
             switch (msg.what) {
                 case NO_BLUETOOTH_DEVICE_SELECTED:
-                    makeToast(getString(R.string.text_bluetooth_nodevice));
+                    if (isAdded())
+                        makeToast(getString(R.string.text_bluetooth_nodevice));
                     break;
                 case CANNOT_CONNECT_TO_DEVICE:
-                    makeToast(getString(R.string.text_bluetooth_error_connecting));
+                    if (isAdded())
+                        makeToast(getString(R.string.text_bluetooth_error_connecting));
                     break;
                 case OBD_COMMAND_FAILURE:
-                    makeToast(getString(R.string.text_obd_command_failure));
+                    if (isAdded())
+                        makeToast(getString(R.string.text_obd_command_failure));
                     break;
                 case OBD_COMMAND_FAILURE_IO:
-                    makeToast(getString(R.string.text_obd_command_failure) + " IO");
+                    if (isAdded())
+                        makeToast(getString(R.string.text_obd_command_failure) + " IO");
                     break;
                 case OBD_COMMAND_FAILURE_IE:
-                    makeToast(getString(R.string.text_obd_command_failure) + " IE");
+                    if (isAdded())
+                        makeToast(getString(R.string.text_obd_command_failure) + " IE");
                     break;
                 case OBD_COMMAND_FAILURE_MIS:
-                    makeToast(getString(R.string.text_obd_command_failure) + " MIS");
+                    if (isAdded())
+                        makeToast(getString(R.string.text_obd_command_failure) + " MIS");
                     break;
                 case OBD_COMMAND_FAILURE_UTC:
-                    makeToast(getString(R.string.text_obd_command_failure) + " UTC");
+                    if (isAdded())
+                        makeToast(getString(R.string.text_obd_command_failure) + " UTC");
                     break;
                 case OBD_COMMAND_FAILURE_NODATA:
-                    makeToastLong(getString(R.string.text_noerrors));
+                    if (isAdded())
+                        makeToastLong(getString(R.string.text_noerrors));
                     break;
                 case NO_DATA:
-                    makeToast(getString(R.string.text_dtc_no_data));
+                    if (isAdded())
+                        makeToast(getString(R.string.text_dtc_no_data));
                     break;
                 case DATA_OK:
-                    dataOk((String) msg.obj);
+                    if (isAdded())
+                        dataOk((String) msg.obj);
                     break;
 
             }
@@ -97,17 +110,12 @@ public class TroubleCodesFragment extends Fragment {
             synchronized (this) {
                 Log.d(TAG, "doInBackground");
                 try {
-                    ((MainActivity) getActivity()).connectBluetoothDeviceAddress("");
-                } catch (Exception e){
-                    Log.e(TAG, "Erro ao estabeler conexão. -> "+e.getMessage());
-                    mHandler.obtainMessage(CANNOT_CONNECT_TO_DEVICE).sendToTarget();
-                }
 
-                try {
-
-                    ModifiedTroubleCodesObdCommand tcoc = new ModifiedTroubleCodesObdCommand();
-                    tcoc.run(((MainActivity)getActivity()).Socket.getInputStream(), ((MainActivity)getActivity()).Socket.getOutputStream());
-                    result = tcoc.getFormattedResult();
+                    if (((MainActivity)getActivity()).deviceIsConnected()) {
+                        ModifiedTroubleCodesObdCommand tcoc = new ModifiedTroubleCodesObdCommand();
+                        tcoc.run(((MainActivity) getActivity()).Socket.getInputStream(), ((MainActivity) getActivity()).Socket.getOutputStream());
+                        result = tcoc.getFormattedResult();
+                    }
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -145,8 +153,9 @@ public class TroubleCodesFragment extends Fragment {
 
         @Override
         protected void onPostExecute(String result) {
-            mHandler.obtainMessage(DATA_OK, result).sendToTarget();
-            //getActivity().setContentView(R.layout.fragment_trouble_codes);
+            if (isAdded()) {
+                mHandler.obtainMessage(DATA_OK, result).sendToTarget();
+            }
         }
     }
 
@@ -162,11 +171,13 @@ public class TroubleCodesFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        this.gtct.cancel(true);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        this.gtct = null;
     }
 
     @Override
@@ -175,18 +186,27 @@ public class TroubleCodesFragment extends Fragment {
         this.rootView = inflater.inflate(R.layout.fragment_trouble_codes, container, false);
 
 
-        this.gtct = new GetTroubleCodesTask();
-        this.gtct.execute("");
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                gtct = new GetTroubleCodesTask();
+                gtct.execute("");
+            }
+        }, 1000);
         return this.rootView;
     }
 
     public void makeToast(String text) {
-        Toast toast = Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT);
-        toast.show();
+        if (isAdded()) {
+            Toast toast = Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT);
+            toast.show();
+        }
     }
     public void makeToastLong(String text) {
-        Toast toast = Toast.makeText(getActivity(), text, Toast.LENGTH_LONG);
-        toast.show();
+        if (isAdded()) {
+            Toast toast = Toast.makeText(getActivity(), text, Toast.LENGTH_LONG);
+            toast.show();
+        }
     }
 
     private void dataOk(String res) {
@@ -197,8 +217,10 @@ public class TroubleCodesFragment extends Fragment {
         //int i =1;
         if (res != null) {
             for (String dtcCode : res.split("\n")) {
-                dtcCodes.add(dtcCode + " : " + dtcVals.get(dtcCode));
-                Log.d("TEST", dtcCode + " : " + dtcVals.get(dtcCode));
+                if (!dtcCode.equals("")) {
+                    dtcCodes.add(dtcCode + " : " + dtcVals.get(dtcCode));
+                    Log.d("TEST", dtcCode + " : " + dtcVals.get(dtcCode));
+                }
             }
         } else {
             dtcCodes.add(getString(R.string.text_noerrors));
@@ -222,17 +244,4 @@ public class TroubleCodesFragment extends Fragment {
         return dict;
     }
 
-    public class ModifiedTroubleCodesObdCommand extends TroubleCodesCommand {
-        @Override
-        public String getResult() {
-            return rawData.replace("SEARCHING...", "").replace("NODATA", "");
-        }
-    }
-
-    public class ClearDTC extends ResetTroubleCodesCommand {
-        @Override
-        public String getResult() {
-            return rawData;
-        }
-    }
 }

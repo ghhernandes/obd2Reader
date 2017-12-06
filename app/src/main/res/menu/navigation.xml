@@ -11,10 +11,10 @@
         android:icon="@drawable/ic_error_black_24dp"
         android:title="@string/title_trouble_codes" />
 
-    <item
-        android:id="@+id/navigation_notifications"
-        android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="@string/title_notifications" />
+    <!--<item-->
+        <!--android:id="@+id/navigation_notifications"-->
+        <!--android:icon="@drawable/ic_notifications_black_24dp"-->
+        <!--android:title="@string/title_notifications" />-->
 
     <item
         android:id="@+id/navigation_options"

@@ -65,13 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 this.mainActivity.Socket = device.createInsecureRfcommSocketToServiceRecord(uuid);
                 this.mainActivity.Socket.connect();
 
-                new ObdResetCommand().run(this.mainActivity.Socket.getInputStream(), this.mainActivity.Socket.getOutputStream());
-
-                new EchoOffCommand().run(this.mainActivity.Socket.getInputStream(), this.mainActivity.Socket.getOutputStream());
-
-                new LineFeedOffCommand().run(this.mainActivity.Socket.getInputStream(), this.mainActivity.Socket.getOutputStream());
-
-                new TimeoutCommand(2000).run(this.mainActivity.Socket.getInputStream(), this.mainActivity.Socket.getOutputStream());
+                executeObdDefaultCommands();
 
                 new SelectProtocolCommand(ObdProtocols.AUTO).run(this.mainActivity.Socket.getInputStream(), this.mainActivity.Socket.getOutputStream());
             } catch (IOException | NoDataException | InterruptedException e) {
@@ -98,6 +92,24 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    public void executeObdDefaultCommands() {
+        try {
+            new ObdResetCommand().run(this.Socket.getInputStream(), this.Socket.getOutputStream());
+
+            new EchoOffCommand().run(this.Socket.getInputStream(), this.Socket.getOutputStream());
+
+            new LineFeedOffCommand().run(this.Socket.getInputStream(), this.Socket.getOutputStream());
+
+            new TimeoutCommand(2000).run(this.Socket.getInputStream(), this.Socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -109,32 +121,32 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_home:
                     setTitle(R.string.title_home);
 
-                    if (!(fragment instanceof HomeFragment)) {
+//                    if (!(fragment instanceof HomeFragment)) {
                         fragment = new HomeFragment();
                         transaction.replace(R.id.main_content, fragment).commit();
-                    }
+//                    }
 
                     break;
                 case R.id.navigation_options:
                     setTitle(R.string.title_options);
-                    if (!(fragment instanceof PreferencesFragment)) {
+//                    if (!(fragment instanceof PreferencesFragment)) {
                         fragment = new PreferencesFragment();
                         transaction.replace(R.id.main_content, fragment).commit();
-                    }
+//                    }
                     break;
-                case R.id.navigation_notifications:
-                    setTitle(R.string.title_notifications);
-                    if (!(fragment instanceof NotificationsFragment)) {
-                        fragment = new NotificationsFragment();
-                        transaction.replace(R.id.main_content, fragment).commit();
-                    }
-                    break;
+//                case R.id.navigation_notifications:
+//                    setTitle(R.string.title_notifications);
+////                    if (!(fragment instanceof NotificationsFragment)) {
+//                        fragment = new NotificationsFragment();
+//                        transaction.replace(R.id.main_content, fragment).commit();
+////                    }
+//                    break;
                 case R.id.navigation_troublecodes:
                     setTitle(R.string.title_trouble_codes);
-                    if (!(fragment instanceof TroubleCodesFragment)) {
+//                    if (!(fragment instanceof TroubleCodesFragment)) {
                         fragment = new TroubleCodesFragment();
                         transaction.replace(R.id.main_content, fragment).commit();
-                    }
+//                    }
                     break;
             }
             FrameLayout subframeLayout = (FrameLayout)findViewById(R.id.main_subcontent);
@@ -203,24 +215,24 @@ public class MainActivity extends AppCompatActivity {
 
     public void connectBluetoothDeviceAddress(String deviceAddress) {
         if ((this.Socket == null) || (!this.Socket.isConnected())) {
-            Toast.makeText(this, R.string.status_bluetooth_connecting, Toast.LENGTH_LONG).show();
-
-            if (!deviceAddress.equals(""))
+             if (deviceAddress.equals(""))
                 deviceAddress = this.BluetoothDeviceAddress;
 
             if (!deviceAddress.equals("")) {
+                Toast.makeText(this, R.string.status_bluetooth_connecting, Toast.LENGTH_LONG).show();
                 ConectarLeitorTask conectarLeitorTask = new ConectarLeitorTask(this, deviceAddress);
                 conectarLeitorTask.execute("");
             }
         }
     }
 
-    public void disconnectBluetoothDevice() throws IOException {
+    public void disconnectBluetoothDevice(boolean showToast) throws IOException {
         this.liveDataActive = false;
 
         if (this.Socket != null) {
             this.Socket.close();
             this.Socket = null;
+            if (showToast)
             Toast.makeText(this, getString(R.string.socket_disconnected_error), Toast.LENGTH_SHORT).show();
         }
     }
@@ -245,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean deviceIsConnected() {
-        return (this.Socket != null) && (this.Socket.isConnected());
+        return (this.Socket != null);
     }
 
     public void setSelectedBluetoothDevice(String device) throws IOException {

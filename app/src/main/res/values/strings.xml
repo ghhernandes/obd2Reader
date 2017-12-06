@@ -3,7 +3,7 @@
     <string name="title_home">Início</string>
     <string name="title_options">Opções</string>
     <string name="title_notifications">Notificações</string>
-    <string name="title_trouble_codes">Trouble Codes</string>
+    <string name="title_trouble_codes">Erros</string>
     <string name="bluetooth_actived">Bluetooth ativado</string>
     <string name="bluetooth_desactived">Bluetooth desativado</string>
     <string name="bluetooth_unsupported">Bluetooth não suportado</string>
