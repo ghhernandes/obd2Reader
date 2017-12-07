@@ -11,16 +11,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.github.gabriel.obd2reader.R;
 import com.github.gabriel.obd2reader.activities.MainActivity;
+import com.github.gabriel.obd2reader.classes.ModifiedResetTroubleCodesCommand;
 import com.github.gabriel.obd2reader.classes.ModifiedTroubleCodesObdCommand;
 import com.github.pires.obd.commands.control.TroubleCodesCommand;
 import com.github.pires.obd.commands.protocol.ResetTroubleCodesCommand;
 import com.github.pires.obd.exceptions.MisunderstoodCommandException;
 import com.github.pires.obd.exceptions.NoDataException;
+import com.github.pires.obd.exceptions.NonNumericResponseException;
 import com.github.pires.obd.exceptions.UnableToConnectException;
 
 import java.io.IOException;
@@ -171,13 +174,18 @@ public class TroubleCodesFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        this.gtct.cancel(true);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        this.gtct = null;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (this.gtct != null && this.gtct.getStatus() == AsyncTask.Status.RUNNING)
+            this.gtct.cancel(true);
     }
 
     @Override
@@ -185,6 +193,30 @@ public class TroubleCodesFragment extends Fragment {
                              Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.fragment_trouble_codes, container, false);
 
+
+        Button btnClearDTC = this.rootView.findViewById(R.id.cleardtc_button);
+        btnClearDTC.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ModifiedResetTroubleCodesCommand rtcc = new ModifiedResetTroubleCodesCommand();
+                try {
+                    rtcc.run(((MainActivity) getActivity()).Socket.getInputStream(), ((MainActivity) getActivity()).Socket.getOutputStream());
+                    Toast.makeText(getActivity(), getString(R.string.clear_dtc_sucess), Toast.LENGTH_SHORT).show();
+                    dataOk(null);
+                } catch (IOException e) {
+                    Toast.makeText(getActivity(), getString(R.string.text_obd_command_failure), Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    Toast.makeText(getActivity(), getString(R.string.text_obd_command_failure), Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                } catch (NonNumericResponseException e) {
+                    if (e.getMessage().toLowerCase().contains("ok")) {
+                        dataOk(null);
+                        Toast.makeText(getActivity(), getString(R.string.clear_dtc_sucess), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
 
         new Timer().schedule(new TimerTask() {
             @Override
@@ -215,7 +247,7 @@ public class TroubleCodesFragment extends Fragment {
 
         ArrayList<String> dtcCodes = new ArrayList<>();
         //int i =1;
-        if (res != null) {
+        if ((res != null) && (!res.equals(""))) {
             for (String dtcCode : res.split("\n")) {
                 if (!dtcCode.equals("")) {
                     dtcCodes.add(dtcCode + " : " + dtcVals.get(dtcCode));

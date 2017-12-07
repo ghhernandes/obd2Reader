@@ -81,11 +81,7 @@ public class MainActivity extends AppCompatActivity {
                 mainActivity.liveDataActive = true;
                 Log.d("ConectarLeitorTask", "Conectado.");
             }else {
-                try {
-                    this.mainActivity.closeConnection();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                this.mainActivity.closeConnection();
                 Log.d("ConectarLeitorTask", "Desconectado.");
                 Toast.makeText(this.mainActivity, R.string.text_bluetooth_error_connecting, Toast.LENGTH_SHORT).show();
             }
@@ -149,12 +145,20 @@ public class MainActivity extends AppCompatActivity {
 //                    }
                     break;
             }
-            FrameLayout subframeLayout = (FrameLayout)findViewById(R.id.main_subcontent);
-            subframeLayout.setVisibility(View.INVISIBLE);
+            showWelcomeScreen(false);
             return true;
         }
 
     };
+
+    private void showWelcomeScreen(boolean b){
+        FrameLayout subframeLayout = (FrameLayout)findViewById(R.id.main_subcontent);
+
+        if (b)
+            subframeLayout.setVisibility(View.VISIBLE);
+        else
+            subframeLayout.setVisibility(View.INVISIBLE);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,6 +169,8 @@ public class MainActivity extends AppCompatActivity {
         this.Socket = null;
         this.Adapter = BluetoothAdapter.getDefaultAdapter();
         this.bluetoothDefaultEnabled = this.Adapter != null && this.Adapter.isEnabled();
+
+        this.showWelcomeScreen(true);
 
         final BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -226,14 +232,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void disconnectBluetoothDevice(boolean showToast) throws IOException {
+    public void disconnectBluetoothDevice(boolean showToast) {
         this.liveDataActive = false;
 
         if (this.Socket != null) {
-            this.Socket.close();
+            try {
+                this.Socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             this.Socket = null;
-            if (showToast)
-            Toast.makeText(this, getString(R.string.socket_disconnected_error), Toast.LENGTH_SHORT).show();
+            if (showToast) {
+                Toast.makeText(this, getString(R.string.socket_disconnected_error), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -247,11 +258,16 @@ public class MainActivity extends AppCompatActivity {
         this.liveDataActive = false;
     }
 
-    public void closeConnection() throws IOException{
+    public void closeConnection(){
         this.liveDataActive = false;
 
-        if (this.Socket != null)
-            this.Socket.close();
+        if (this.Socket != null) {
+            try {
+                this.Socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         this.Socket = null;
     }

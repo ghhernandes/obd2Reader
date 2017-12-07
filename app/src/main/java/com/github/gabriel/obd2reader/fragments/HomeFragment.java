@@ -15,15 +15,16 @@ import com.github.gabriel.obd2reader.adapters.MainAdapter;
 import com.github.gabriel.obd2reader.classes.SensorClass;
 import com.github.gabriel.obd2reader.config.ObdConfig;
 import com.github.pires.obd.commands.ObdCommand;
+import com.github.pires.obd.exceptions.MisunderstoodCommandException;
 import com.github.pires.obd.exceptions.NoDataException;
 import com.github.pires.obd.exceptions.NonNumericResponseException;
+import com.github.pires.obd.exceptions.UnableToConnectException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class HomeFragment extends Fragment {
 
@@ -32,15 +33,12 @@ public class HomeFragment extends Fragment {
     private List<SensorClass> sensores = null;
     private LiveDataThread dataThread = null;
 
-    public List<SensorClass> getSensores() {
-        return this.sensores;
-    }
-
-
     public HomeFragment() {
     }
 
     private class LiveDataThread extends Thread {
+        private String TAG = this.getName();
+
         @Override
         public void run(){
             while (!this.isInterrupted()){
@@ -72,19 +70,76 @@ public class HomeFragment extends Fragment {
                             act.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    try {
-                                        act.disconnectBluetoothDevice(true);
-                                        interrupt();
-                                    } catch (IOException e1) {
-                                        Log.i("LiveDataThread", "Erro ao desconectar. "+e1.getMessage());
-                                        e1.printStackTrace();
-                                    }
+                                    act.disconnectBluetoothDevice(true);
+                                    interrupt();
                                 }
                             });
                         e.printStackTrace();
                     }
                 }
             }
+
+//            while (!this.isInterrupted()) {
+//
+//                for (final SensorClass sensorClass : sensores) {
+//                    try {
+//                        if ((act.liveDataActive) && (sensorClass.getCmd() != null)) {
+//                            sensorClass.getCmd().run(act.Socket.getInputStream(), act.Socket.getOutputStream());
+//
+//                            final String value = sensorClass.getCmd().getFormattedResult();
+//                            if (!value.equals(sensorClass.getValue()) && (!this.isInterrupted())) {
+//                                act.runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        mAdapter.update(sensores.indexOf(sensorClass), value);
+//                                    }
+//                                });
+//                            }
+//                        }
+//                    } catch (IOException e) {
+//                        Log.e(TAG, e.getMessage());
+//                        if (e.getMessage().toLowerCase().contains("broken pipe"))
+//                            act.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    act.disconnectBluetoothDevice(true);
+//                                    interrupt();
+//                                }
+//                            });
+//                        e.printStackTrace();
+//                    } catch (InterruptedException e) {
+//                        Log.e(TAG, e.getMessage());
+//                        e.printStackTrace();
+//                    } catch (UnableToConnectException e) {
+//                        Log.e(TAG, e.getMessage());
+//                        e.printStackTrace();
+//                    } catch (MisunderstoodCommandException e) {
+//                        Log.e(TAG, e.getMessage());
+//                        e.printStackTrace();
+//                    } catch (NoDataException e) {
+//                        Log.e(TAG, e.getMessage());
+////                act.runOnUiThread(new Runnable() {
+////                    @Override
+////                    public void run() {
+////                        act.disconnectBluetoothDevice(true);
+////                        interrupt();
+////                    }
+////                });
+////                e.printStackTrace();
+//                    } catch (Exception e) {
+//                        Log.e(TAG, e.getMessage());
+//                        if (e.getMessage().toLowerCase().contains("broken pipe"))
+//                            act.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    act.disconnectBluetoothDevice(true);
+//                                    interrupt();
+//                                }
+//                            });
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
         }
     }
 
@@ -143,9 +198,6 @@ public class HomeFragment extends Fragment {
 
         ((MainActivity)getActivity()).liveDataActive = ((MainActivity)getActivity()).deviceIsConnected();
 
-
-        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-
         if ((this.dataThread == null) && ((MainActivity)getActivity()).liveDataActive) {
            new Timer().schedule(new TimerTask() {
                @Override
@@ -154,7 +206,7 @@ public class HomeFragment extends Fragment {
                    dataThread.start();
                }
            }, 1000);
-        };
+        }
 
         return rootView;
     }

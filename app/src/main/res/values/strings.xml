@@ -3,7 +3,7 @@
     <string name="title_home">Início</string>
     <string name="title_options">Opções</string>
     <string name="title_notifications">Notificações</string>
-    <string name="title_trouble_codes">Erros</string>
+    <string name="title_trouble_codes">Notificações e erros</string>
     <string name="bluetooth_actived">Bluetooth ativado</string>
     <string name="bluetooth_desactived">Bluetooth desativado</string>
     <string name="bluetooth_unsupported">Bluetooth não suportado</string>
@@ -15,6 +15,7 @@
     <string name="socket_disconnected_error">Conexão falhou. Conecte-se novamente.</string>
     <string name="action_settings">Configurações</string>
     <string name="action_clear_codes">Limpar códigos</string>
+    <string name="clear_dtc_sucess">Códigos limpos com sucesso.</string>
     <string name="text_consumption_default" translatable="false">0l/100km</string>
     <string name="text_runtime_default" translatable="false">00:00:00</string>
     <string name="title_pref_obd">Preferências do OBD-II</string>
